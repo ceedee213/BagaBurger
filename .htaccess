@@ -1,0 +1,11 @@
+# --- Baga Burger Security Rules ---
+
+# 1. Disable Directory Browsing
+# Prevents visitors from seeing a list of your files in a folder.
+Options -Indexes
+
+# 2. Protect Sensitive Files
+# Blocks direct web access to files that should not be viewed from a browser.
+<Files "db.php">
+    Require all denied
+</Files>

@@ -1,0 +1,562 @@
+/* Reset and body */
+html, body {
+    margin: 0;
+    padding: 0;
+    scroll-behavior: smooth;
+    font-family: Arial, sans-serif;
+    overflow-x: hidden;
+    background: url('2.jpg') no-repeat center center/cover; /* background for all pages */
+    background-size: cover;
+    height: 100%;
+}
+
+/* Header Nav */
+header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background-color: rgba(51, 51, 51, 0.4);
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+header nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 30px;
+}
+
+header .logo img {
+    height: 50px;
+}
+
+nav ul {
+    display: flex;
+    justify-content: center;
+    list-style-type: none;
+    margin: 0;
+    padding: 1em 0;
+}
+
+nav ul li {
+    margin: 0 20px;
+}
+
+nav ul li a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* Main spacing */
+main {
+    margin-top: 60px;
+}
+
+body.home main {
+    margin-top: 0;
+}
+
+/* Hero Section */
+.hero {
+    width: 100%;
+    height: 100vh;
+    background: url('2.jpg') no-repeat center center/cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    margin: 0;
+    padding: 0;
+}
+
+.hero::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0,0,0,0.2);
+}
+
+.hero-content {
+    position: relative;
+    background-color: rgba(255, 255, 255, 0.25);
+    padding: 30px;
+    border-radius: 12px;
+    color: white;
+    z-index: 2;
+}
+
+.hero-logo {
+    max-width: 200px;
+    margin-bottom: 20px;
+}
+
+/* Hero button */
+.btn-primary {
+    display: inline-block;
+    padding: 12px 25px;
+    background-color: rgba(255, 204, 0, 0.85);
+    color: #000;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: rgba(255, 153, 0, 0.9);
+}
+
+/* Glass section */
+.glass-section {
+    background-color: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    padding: 40px;
+    max-width: 900px;
+    margin: auto;
+    border-radius: 15px;
+    color: white;
+    text-align: center;
+    min-height: calc(100vh - 120px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* About page text colors */
+body.about .glass-section p {
+    color: black;
+}
+
+body.about .glass-section strong {
+    color: gold;
+}
+
+body.about .glass-section em {
+    color: #ff4d4d;
+}
+
+/* Two-column menu layouts */
+.menu-list ul,
+.extra-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    max-width: 650px;
+}
+
+/* Menu item with price */
+.menu-list li,
+.extra-menu li,
+.addons-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.menu-list li:hover,
+.extra-menu li:hover,
+.addons-list li:hover {
+    background-color: rgba(0, 0, 0, 0.85);
+    color: white;
+    cursor: pointer;
+}
+
+/* Price style */
+.price {
+    font-weight: bold;
+    color: gold;
+}
+
+/* Optional Add-ons - multi-column */
+.addons-list {
+    list-style: none;
+    padding: 0;
+    margin: 20px auto 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    max-width: 650px;
+}
+
+
+.about-video {
+    width: 20%;           /* smaller relative size */
+    max-width: 250px;     /* limit the maximum width */
+    margin: 0 auto 18px;  /* center + spacing below */
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.about-video video {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Full-screen centered login */
+.login-body {
+    background: url('2.jpg') no-repeat center center/cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Glass-style login box */
+.glass-login {
+    background-color: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    padding: 40px;
+    border-radius: 15px;
+    text-align: center;
+    color: white;
+    width: 100%;
+    max-width: 350px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+/* Logo above login form */
+.login-logo {
+    max-width: 120px;
+    margin-bottom: 15px;
+}
+
+/* Subtitle text */
+.login-subtitle {
+    font-size: 14px;
+    color: #f0f0f0;
+    margin-bottom: 20px;
+}
+
+/* Form groups */
+.form-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.form-group label {
+    font-weight: bold;
+    font-size: 14px;
+    display: block;
+    margin-bottom: 5px;
+}
+
+/* Inputs */
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    background-color: rgba(255, 255, 255, 0.85);
+    font-size: 14px;
+}
+
+/* Primary button (uses existing btn-primary style) */
+.btn-primary {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: rgba(255, 204, 0, 0.85);
+    color: #000;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: rgba(255, 153, 0, 0.9);
+}
+
+/* Login message styling */
+#login-message {
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+/* Popup overlay for messages */
+.popup-overlay {
+    position: fixed;
+    top: 0; 
+    left: 0;
+    width: 100%; 
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+/* Popup content box */
+.popup-box {
+    background-color: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    padding: 30px 40px;
+    border-radius: 15px;
+    text-align: center;
+    color: white;
+    max-width: 350px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+/* Popup heading */
+.popup-box h3 {
+    margin-bottom: 15px;
+    color: gold;
+}
+
+/* Popup OK button */
+.popup-btn {
+    background-color: rgba(255, 204, 0, 0.85);
+    color: black;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.popup-btn:hover {
+    background-color: rgba(255, 153, 0, 0.9);
+}
+
+/* Sign up / login page link under forms */
+.account-link {
+    margin-top: 15px;
+    text-align: center;
+    font-size: 14px;
+    color: white;
+}
+
+.account-link a {
+    color: gold;
+    font-weight: bold;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.account-link a:hover {
+    color: orange;
+}
+/* ===== Admin Dashboard Styles ===== */
+
+.admin-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 220px;
+  background: #222;
+  color: white;
+  padding: 20px;
+}
+
+.sidebar h2 {
+  margin-top: 0;
+  color: gold;
+}
+
+.sidebar p {
+  margin: 10px 0 20px;
+  font-size: 14px;
+}
+
+.sidebar a {
+  display: block;
+  color: white;
+  text-decoration: none;
+  margin: 10px 0;
+  padding: 8px;
+  border-radius: 6px;
+  transition: background 0.3s;
+}
+
+.sidebar a:hover {
+  background: gold;
+  color: black;
+}
+
+.content {
+  flex: 1;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(6px);
+  color: white;
+}
+
+.card {
+  background: rgba(0, 0, 0, 0.6);
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  color: white;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.logout {
+  margin-top: 30px;
+  display: inline-block;
+  background: crimson;
+  color: white;
+  padding: 8px 15px;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.logout:hover {
+  background: darkred;
+}
+/* ===== Admin Dashboard Styles (New Section) ===== */
+
+/* General Admin Page Layout */
+.admin-dashboard {
+  /* Ensure the glass section stretches to accommodate content */
+  min-height: 80vh;
+  /* Override default glass-section padding for dashboard layout */
+  padding: 30px; 
+}
+
+/* Dashboard Stats Grid */
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+/* Individual Stat Card */
+.stat-card {
+  background: rgba(255, 255, 255, 0.9); /* White card with slight transparency */
+  color: #333;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+}
+
+.stat-icon {
+  font-size: 30px;
+  margin-bottom: 10px;
+  display: inline-block;
+}
+
+.stat-card h2 {
+  font-size: 1.2em;
+  margin-top: 0;
+  margin-bottom: 5px;
+  color: #555;
+}
+
+.stat-value {
+  font-size: 2.2em;
+  font-weight: bold;
+  margin: 0;
+}
+
+/* Specific Card Colors */
+.stat-card.sales {
+  border-left: 5px solid #ffcc00; /* Gold */
+}
+.stat-card.sales .stat-value {
+  color: #e6b800; /* Darker Gold */
+}
+
+.stat-card.pending {
+  border-left: 5px solid #ff6600; /* Orange for urgency */
+}
+.stat-card.pending .stat-value {
+  color: #ff6600;
+}
+
+.stat-card.users {
+  border-left: 5px solid #00aaff; /* Blue */
+}
+.stat-card.users .stat-value {
+  color: #00aaff;
+}
+
+.stat-card.product-management {
+  border-left: 5px solid #4CAF50; /* Green */
+}
+
+
+/* Card Link for Actionable Cards */
+.card-link {
+  display: block;
+  margin-top: 10px;
+  font-size: 0.9em;
+  font-weight: bold;
+  color: #007bff; /* Blue link */
+  text-decoration: none;
+}
+.card-link:hover {
+  text-decoration: underline;
+}
+
+/* Low Stock Report List */
+.low-stock-report {
+  background: rgba(255, 100, 100, 0.1); /* Light Red background for alert */
+  border: 1px solid crimson;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.stock-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.stock-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  font-weight: bold;
+  color: #333;
+}
+
+.stock-list li:last-child {
+  border-bottom: none;
+}
+
+.stock-level {
+  color: crimson;
+  font-weight: bolder;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .dashboard-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+
+
+
