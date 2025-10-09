@@ -7,8 +7,9 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// Fetch all available menu items and group them by category
-$sql = "SELECT code, name, price, stock, category FROM menu WHERE stock > 0 ORDER BY category, name ASC";
+// --- MODIFIED SQL ---
+// Fetch all menu items EXCEPT those in the 'Add-ons' category
+$sql = "SELECT code, name, price, stock, category FROM menu WHERE stock > 0 AND category != 'Add-ons' ORDER BY category, name ASC";
 $result = $conn->query($sql);
 
 $categorized_menu = [];
@@ -133,7 +134,8 @@ if ($result->num_rows > 0) {
 <main>
   <section class="glass-section menu-container">
     <h1>Our Menu</h1>
-    <form action="process_order.php" method="POST" id="menu-form">
+    <!-- --- MODIFIED FORM ACTION --- -->
+    <form action="addons.php" method="POST" id="menu-form">
       <?php if (empty($categorized_menu)): ?>
         <p>Our menu is currently empty. Please check back later!</p>
       <?php else: ?>
@@ -142,7 +144,7 @@ if ($result->num_rows > 0) {
           <div class="menu-grid">
             <?php foreach ($items as $item): ?>
             <div class="menu-item-card" data-code="<?= $item['code'] ?>" data-price="<?= $item['price'] ?>" data-stock="<?= $item['stock'] ?>">
-              <img src="product_images/<?= htmlspecialchars($item['code']) ?>.jpg" alt="<?= htmlspecialchars($item['name']) ?>" 
+              <img src="product_images/<?= htmlspecialchars($item['code']) ?>.jpg" alt="<?= htmlspecialchars($item['name']) ?>"
                    onerror="this.onerror=null;this.src='images.png';">
               <div class="menu-item-info">
                 <div>
@@ -169,7 +171,8 @@ if ($result->num_rows > 0) {
     <div class="cart-summary">
         🛒 Items: <span id="total-items">0</span> | Total: <span>₱</span><span id="total-price">0.00</span>
     </div>
-    <button type="submit" form="menu-form" class="btn-place-order" id="place-order-btn" disabled>Place Order</button>
+    <!-- --- MODIFIED BUTTON TEXT --- -->
+    <button type="submit" form="menu-form" class="btn-place-order" id="place-order-btn" disabled>Proceed to Add-ons</button>
 </div>
 
 <script>
@@ -186,7 +189,7 @@ document.addEventListener('DOMContentLoaded', function() {
         cards.forEach(card => {
             const quantity = parseInt(card.querySelector('.quantity-input').value);
             const price = parseFloat(card.dataset.price);
-            
+
             totalItems += quantity;
             totalPrice += quantity * price;
         });
@@ -194,11 +197,7 @@ document.addEventListener('DOMContentLoaded', function() {
         totalItemsElem.textContent = totalItems;
         totalPriceElem.textContent = totalPrice.toFixed(2);
 
-        if (totalItems > 0) {
-            placeOrderBtn.disabled = false;
-        } else {
-            placeOrderBtn.disabled = true;
-        }
+        placeOrderBtn.disabled = totalItems <= 0;
     }
 
     cards.forEach(card => {

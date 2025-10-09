@@ -8,7 +8,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $user_id = $_SESSION['user_id'];
-$items = $_POST['items'] ?? [];
+$items = $_POST['items'] ?? []; // This now receives main items AND add-ons together
 $confirm = $_POST['confirm'] ?? null;
 $payment_method = $_POST['payment_method'] ?? null;
 
@@ -89,8 +89,8 @@ if ($confirm === '1' && $payment_method) {
     }
 }
 
-// This HTML block runs FIRST, when the user comes from the menu page.
-// It now shows a detailed order summary and then asks them to confirm and choose a payment method.
+// This HTML block runs FIRST, when the user comes from the addons page.
+// It now shows a detailed order summary (with add-ons) and then asks them to confirm and choose a payment method.
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -125,7 +125,7 @@ if ($confirm === '1' && $payment_method) {
 </head>
 <body class="login-body">
   <main class="glass-login" style="color:white; text-align:center; max-width: 600px;">
-    <h1>Please Review Your Order</h1>
+    <h1>Please Review Your Final Order</h1>
 
     <table class="order-summary-table">
         <thead>
@@ -178,3 +178,4 @@ if ($confirm === '1' && $payment_method) {
   </main>
 </body>
 </html>
+
