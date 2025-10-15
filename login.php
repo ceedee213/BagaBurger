@@ -138,9 +138,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </form>
 
     <p style="margin-top: 15px; font-size: 14px; color: white;">
-      Don't have an account? 
-      <a href="signup.php" style="color: gold; font-weight: bold; text-decoration: none;">Sign up</a>
-    </p>
+  Don't have an account? 
+  <a href="signup.php" style="color: gold; font-weight: bold; text-decoration: none;">Sign up</a>
+  </p>
+
+  <p style="margin-top: 10px; font-size: 14px;">
+      <a href="forgot_password.php" style="color: gold; text-decoration: none;">Forgot Password?</a>
+  </p>
 
   </main>
 </body>
