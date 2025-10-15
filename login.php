@@ -3,13 +3,23 @@ session_start();
 require 'db.php'; // connect to MySQL
 
 $error = '';
+$success = '';
+$inactive_email = null; // Variable to hold the email for the resend link
+
+// --- NEW: Check for feedback messages from resend_verification.php ---
+if (isset($_GET['resent']) && $_GET['resent'] == 1) {
+    $success = "A new verification link has been sent to your email address.";
+}
+if (isset($_GET['error'])) {
+    $error = "Could not resend verification email. Please try again.";
+}
+
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $usernameOrEmail = trim($_POST['username']);
     $password        = $_POST['password'];
 
-    // --- MODIFIED LOGIN LOGIC ---
-    // First, find the user without checking if they are active
+    // Find the user without checking if they are active
     $stmt = $conn->prepare("SELECT id, username, email, password, role, is_active FROM users WHERE username = ? OR email = ?");
     if (!$stmt) {
         die("Prepare failed: " . $conn->error);
@@ -21,13 +31,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($res->num_rows === 1) {
         $user = $res->fetch_assoc();
 
-        // NEW: Check if the account is active *before* checking the password
+        // Check if the account is active
         if ($user['is_active'] == 0) {
+            // --- MODIFICATION: Prepare to show the resend link ---
             $error = "Your account is not active. Please check your email to verify it.";
+            $inactive_email = $user['email']; // Pass the user's email to the form
         } 
         // If active, now check the password
         elseif (password_verify($password, $user['password'])) {
-            // Your original session and redirect logic is unchanged
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
             $_SESSION['role'] = $user['role'];
@@ -65,24 +76,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       gap: 10px;
       margin-top: 10px;
     }
-    .btn-primary, .btn-admin {
+    .btn-primary {
       padding: 10px 20px;
       border: none;
       border-radius: 8px;
       cursor: pointer;
       font-weight: bold;
       font-size: 14px;
-    }
-    .btn-primary {
       background: gold;
       color: black;
     }
-    .btn-admin {
-      background: crimson;
-      color: white;
-    }
-    .btn-admin:hover {
-      background: darkred;
+    /* --- NEW STYLE for the resend button --- */
+    .btn-resend {
+        background: none;
+        border: none;
+        color: gold;
+        text-decoration: underline;
+        cursor: pointer;
+        padding: 0;
+        font-family: inherit;
+        font-size: 1em;
     }
   </style>
 </head>
@@ -96,6 +109,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php if ($error): ?>
       <p style="color: yellow;"><?= htmlspecialchars($error) ?></p>
     <?php endif; ?>
+    <?php if ($success): ?>
+      <p style="color: lightgreen;"><?= htmlspecialchars($success) ?></p>
+    <?php endif; ?>
+
+    <?php if ($inactive_email): ?>
+        <form action="resend_verification.php" method="POST" style="margin-top:-10px; margin-bottom:15px;">
+            <input type="hidden" name="email" value="<?= htmlspecialchars($inactive_email) ?>">
+            <button type="submit" class="btn-resend">Resend verification email?</button>
+        </form>
+    <?php endif; ?>
+
 
     <form method="POST" action="login.php">
       <div class="form-group">

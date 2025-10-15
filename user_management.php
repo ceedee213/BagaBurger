@@ -46,10 +46,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_user'])) {
             $feedback = "<p class='feedback error'>Error: Username or email is already taken.</p>";
         } else {
             $password_hash = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = $conn->prepare("INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)");
+            // --- MODIFIED: Added is_active and is_verified columns ---
+            // Accounts created by the owner are activated immediately.
+            $stmt = $conn->prepare("INSERT INTO users (username, email, password, role, is_active, is_verified) VALUES (?, ?, ?, ?, 1, 1)");
             $stmt->bind_param("ssss", $username, $email, $password_hash, $role);
             if ($stmt->execute()) {
-                $feedback = "<p class='feedback success'>Success: New account created successfully.</p>";
+                $feedback = "<p class='feedback success'>Success: New account created and activated successfully.</p>";
             } else {
                 $feedback = "<p class='feedback error'>Error: An unexpected error occurred.</p>";
             }
