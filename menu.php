@@ -7,8 +7,12 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// --- MODIFIED SQL ---
-// Fetch all menu items EXCEPT those in the 'Add-ons' category
+// --- ADDED LOGIC: Load the cart from the session ---
+// This checks if a cart already exists in the session and loads it.
+// If not, it creates an empty cart.
+$cart = $_SESSION['cart'] ?? [];
+
+// This part of your code is unchanged
 $sql = "SELECT code, name, price, stock, category FROM menu WHERE stock > 0 AND category != 'Add-ons' ORDER BY category, name ASC";
 $result = $conn->query($sql);
 
@@ -134,7 +138,6 @@ if ($result->num_rows > 0) {
 <main>
   <section class="glass-section menu-container">
     <h1>Our Menu</h1>
-    <!-- --- MODIFIED FORM ACTION --- -->
     <form action="addons.php" method="POST" id="menu-form">
       <?php if (empty($categorized_menu)): ?>
         <p>Our menu is currently empty. Please check back later!</p>
@@ -143,6 +146,12 @@ if ($result->num_rows > 0) {
           <h2 class="category-title"><?= htmlspecialchars($category) ?></h2>
           <div class="menu-grid">
             <?php foreach ($items as $item): ?>
+            <?php
+                // --- ADDED LOGIC: Check session for existing quantity ---
+                // This sets the quantity for the item based on what's in the session cart.
+                $quantity = isset($cart[$item['code']]) ? intval($cart[$item['code']]) : 0;
+                $minus_disabled = $quantity === 0 ? 'disabled' : '';
+            ?>
             <div class="menu-item-card" data-code="<?= $item['code'] ?>" data-price="<?= $item['price'] ?>" data-stock="<?= $item['stock'] ?>">
               <img src="product_images/<?= htmlspecialchars($item['code']) ?>.jpg" alt="<?= htmlspecialchars($item['name']) ?>"
                    onerror="this.onerror=null;this.src='images.png';">
@@ -152,10 +161,10 @@ if ($result->num_rows > 0) {
                   <p class="price">₱<?= number_format($item['price'], 2) ?></p>
                 </div>
                 <div class="quantity-selector">
-                  <button type="button" class="btn-minus" disabled>-</button>
-                  <span class="quantity">0</span>
+                  <button type="button" class="btn-minus" <?= $minus_disabled ?>>-</button>
+                  <span class="quantity"><?= $quantity ?></span>
                   <button type="button" class="btn-plus">+</button>
-                  <input type="hidden" name="items[<?= $item['code'] ?>]" value="0" class="quantity-input">
+                  <input type="hidden" name="items[<?= $item['code'] ?>]" value="<?= $quantity ?>" class="quantity-input">
                 </div>
               </div>
             </div>
@@ -171,7 +180,6 @@ if ($result->num_rows > 0) {
     <div class="cart-summary">
         🛒 Items: <span id="total-items">0</span> | Total: <span>₱</span><span id="total-price">0.00</span>
     </div>
-    <!-- --- MODIFIED BUTTON TEXT --- -->
     <button type="submit" form="menu-form" class="btn-place-order" id="place-order-btn" disabled>Proceed to Add-ons</button>
 </div>
 
@@ -235,6 +243,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    // --- ADDED LOGIC: Update the cart summary on page load ---
+    // This makes sure the floating cart shows the correct totals
+    // based on the items loaded from the session.
+    updateCartSummary();
 });
 </script>
 </body>

@@ -7,15 +7,30 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+// --- MODIFICATION START ---
+// Load the entire cart from the session first
+$cart = $_SESSION['cart'] ?? [];
+
+// Get the add-ons submitted from the form
+$submitted_addons = $_POST['items'] ?? [];
+
+// Merge the submitted add-ons into the main session cart
+foreach ($submitted_addons as $code => $qty) {
+    if (intval($qty) > 0) {
+        $cart[$code] = $qty; // Add or update the add-on
+    } else {
+        unset($cart[$code]); // Remove add-on if quantity is 0
+    }
+}
+// Now, $cart contains BOTH main items and add-ons
+$ordered_items = $cart;
+// --- MODIFICATION END ---
+
+
 $user_id = $_SESSION['user_id'];
-$items = $_POST['items'] ?? []; // This now receives main items AND add-ons together
 $confirm = $_POST['confirm'] ?? null;
 $payment_method = $_POST['payment_method'] ?? null;
 
-// Filter only positive quantities
-$ordered_items = array_filter($items, function($qty) {
-    return intval($qty) > 0;
-});
 
 if (empty($ordered_items)) {
     die("<p>No items were selected. <a href='menu.php'>Back to Menu</a></p>");
@@ -52,19 +67,15 @@ foreach ($ordered_items as $code => $qty) {
     }
 }
 
-// This block runs AFTER the user confirms their order and selects a payment method.
-// It creates the order in the database.
 if ($confirm === '1' && $payment_method) {
     $conn->begin_transaction();
     try {
-        // Step 1: Create the main order record with 'Pending Payment' status
         $order_stmt = $conn->prepare("INSERT INTO orders (user_id, total_amount, payment_method, status, created_at) VALUES (?, ?, ?, 'Pending Payment', NOW())");
         $order_stmt->bind_param("ids", $user_id, $total_price, $payment_method);
         $order_stmt->execute();
         $order_id = $conn->insert_id;
         $order_stmt->close();
 
-        // Step 2: Insert the ordered items (without touching stock)
         $item_stmt = $conn->prepare("INSERT INTO order_items (order_id, menu_id, quantity, price_at_purchase) VALUES (?, ?, ?, ?)");
         foreach ($ordered_items as $code => $qty) {
             $menu_id = $menu_data[$code]['id'];
@@ -74,10 +85,8 @@ if ($confirm === '1' && $payment_method) {
         }
         $item_stmt->close();
 
-        // If everything is successful, commit the transaction
         $conn->commit();
-
-        // Redirect to the new payment page.
+        unset($_SESSION['cart']); 
         header("Location: payment.php?order_id=" . $order_id);
         exit;
 
@@ -88,9 +97,6 @@ if ($confirm === '1' && $payment_method) {
         exit;
     }
 }
-
-// This HTML block runs FIRST, when the user comes from the addons page.
-// It now shows a detailed order summary (with add-ons) and then asks them to confirm and choose a payment method.
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -99,34 +105,16 @@ if ($confirm === '1' && $payment_method) {
   <title>Confirm Your Order</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* Add some styles for the new order summary table */
-    .order-summary-table {
-        width: 100%;
-        margin-top: 20px;
-        margin-bottom: 20px;
-        border-collapse: collapse;
-        text-align: left;
-    }
-    .order-summary-table th, .order-summary-table td {
-        padding: 10px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-    }
-    .order-summary-table th {
-        color: gold;
-    }
-    .order-summary-table .price-col {
-        text-align: right;
-    }
-    .total-row strong {
-        font-size: 1.2em;
-        color: gold;
-    }
+    .order-summary-table { width: 100%; margin-top: 20px; margin-bottom: 20px; border-collapse: collapse; text-align: left; }
+    .order-summary-table th, .order-summary-table td { padding: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.3); }
+    .order-summary-table th { color: gold; }
+    .order-summary-table .price-col { text-align: right; }
+    .total-row strong { font-size: 1.2em; color: gold; }
   </style>
 </head>
 <body class="login-body">
-  <main class="glass-login" style="color:white; text-align:center; max-width: 600px;">
+  <main class="glass-login" style="color:black; text-align:center; max-width: 600px;">
     <h1>Please Review Your Final Order</h1>
-
     <table class="order-summary-table">
         <thead>
             <tr>
@@ -152,16 +140,14 @@ if ($confirm === '1' && $payment_method) {
         </tbody>
     </table>
     <hr style="border-color: rgba(255,255,255,0.3);">
-
     <form action="process_order.php" method="POST">
       <?php
-      // Pass the order items again as hidden inputs
+      // Pass the final combined items again as hidden inputs
       foreach ($ordered_items as $code => $qty) {
           echo '<input type="hidden" name="items[' . htmlspecialchars($code) . ']" value="' . intval($qty) . '">';
       }
       ?>
       <input type="hidden" name="confirm" value="1" />
-
       <div style="text-align:left; margin: 20px 0;">
         <h3 style="margin-bottom: 15px;">Choose Your Payment Method:</h3>
         <label style="display:block; padding:10px; background:rgba(0,0,0,0.2); border-radius:5px; margin-bottom:10px;">
@@ -171,11 +157,9 @@ if ($confirm === '1' && $payment_method) {
           <input type="radio" name="payment_method" value="paymaya" required> PayMaya
         </label>
       </div>
-
       <button type="submit" class="btn-primary">Confirm & Proceed to Payment</button>
       <a href="menu.php" class="btn-secondary" style="background:grey; color:white; padding: 10px 20px; text-decoration: none; border-radius: 8px; margin-left:10px;">Cancel</a>
     </form>
   </main>
 </body>
 </html>
-

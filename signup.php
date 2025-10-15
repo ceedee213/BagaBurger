@@ -62,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $mail->addAddress($email, $username);
 
                             // IMPORTANT: Change this URL to your actual domain and project path
-                            $verification_link = "http://localhost/baga-burger/verify.php?token=$token";
+                            $verification_link = "https://bagaburger.shop/verify.php?token=$token";
                             
                             $mail->isHTML(true);
                             $mail->Subject = 'Verify Your Baga Burger Account';
@@ -134,7 +134,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <main class="login-page glass-login">
   <img src="images.png" alt="Baga Burger Logo" class="login-logo" />
-  <h2>Create Your Account</h2>
+  <h2>Account Created!</h2>
 
   <?php if ($error): ?>
     <p style="color: yellow;"><?= htmlspecialchars($error) ?></p>
@@ -142,6 +142,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   <?php if ($success): ?>
     <p style="color: white;"><?= $success ?></p>
+    <!-- --- MODIFICATION: ADDED THIS BUTTON --- -->
+    <a href="login.php" class="btn-primary" style="text-decoration: none; margin-top: 15px;">Go to Login</a>
   <?php else: ?>
     <form method="POST" action="signup.php">
       <div class="form-group">

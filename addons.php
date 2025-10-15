@@ -7,13 +7,33 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// Get the main items selected from the menu page
-$main_items = $_POST['items'] ?? [];
+// Initialize session cart if it doesn't exist
+if (!isset($_SESSION['cart'])) {
+    $_SESSION['cart'] = [];
+}
 
-// Filter out items that were not selected
-$selected_main_items = array_filter($main_items, function($qty) {
-    return intval($qty) > 0;
-});
+// If receiving new main items from menu.php, update the session cart
+if (isset($_POST['items'])) {
+    $main_items = $_POST['items'];
+    foreach ($main_items as $code => $qty) {
+        if (intval($qty) > 0) {
+            $_SESSION['cart'][$code] = $qty; // Add or update item
+        } else {
+            unset($_SESSION['cart'][$code]); // Remove if quantity is 0
+        }
+    }
+}
+
+// Filter out main items from the cart to avoid showing them on this page
+$selected_main_items = array_filter($_SESSION['cart'], function($item_code) use ($conn) {
+    $stmt = $conn->prepare("SELECT category FROM menu WHERE code = ?");
+    $stmt->bind_param("s", $item_code);
+    $stmt->execute();
+    $category = $stmt->get_result()->fetch_assoc()['category'] ?? 'Main';
+    $stmt->close();
+    return $category !== 'Add-ons';
+}, ARRAY_FILTER_USE_KEY);
+
 
 if (empty($selected_main_items)) {
     // Redirect back if no main items were chosen
@@ -21,8 +41,7 @@ if (empty($selected_main_items)) {
     exit;
 }
 
-// This SQL query specifically fetches the items you requested (bacon, cheese, etc.)
-// as long as their category is set to 'Add-ons' in your database.
+// Fetch add-on items from the database
 $sql = "SELECT code, name, price, stock, category FROM menu WHERE stock > 0 AND category = 'Add-ons' ORDER BY name ASC";
 $result = $conn->query($sql);
 $addons = $result->fetch_all(MYSQLI_ASSOC);
@@ -64,21 +83,16 @@ $addons = $result->fetch_all(MYSQLI_ASSOC);
   <section class="glass-section menu-container">
     <h1>Want Some Add-ons?</h1>
     <form action="process_order.php" method="POST" id="addons-form">
-      <?php
-      // This part carries over the main items (burgers, drinks) you selected on the previous page.
-      foreach ($selected_main_items as $code => $qty) {
-          echo '<input type="hidden" name="items[' . htmlspecialchars($code) . ']" value="' . intval($qty) . '">';
-      }
-      ?>
-
       <?php if (empty($addons)): ?>
         <p>There are no add-ons available at the moment.</p>
       <?php else: ?>
         <h2 class="category-title">Extras</h2>
         <div class="menu-grid">
           <?php
-          // This loop creates the visual list of your add-ons (bacon, cheese, etc.) for the user to choose from.
           foreach ($addons as $item):
+            // Check if this addon is already in the cart session
+            $quantity = isset($_SESSION['cart'][$item['code']]) ? intval($_SESSION['cart'][$item['code']]) : 0;
+            $minus_disabled = $quantity === 0 ? 'disabled' : '';
           ?>
           <div class="menu-item-card" data-code="<?= $item['code'] ?>" data-price="<?= $item['price'] ?>" data-stock="<?= $item['stock'] ?>">
             <img src="product_images/<?= htmlspecialchars($item['code']) ?>.jpg" alt="<?= htmlspecialchars($item['name']) ?>"
@@ -89,10 +103,10 @@ $addons = $result->fetch_all(MYSQLI_ASSOC);
                 <p class="price">₱<?= number_format($item['price'], 2) ?></p>
               </div>
               <div class="quantity-selector">
-                <button type="button" class="btn-minus" disabled>-</button>
-                <span class="quantity">0</span>
+                <button type="button" class="btn-minus" <?= $minus_disabled ?>>-</button>
+                <span class="quantity"><?= $quantity ?></span>
                 <button type="button" class="btn-plus">+</button>
-                <input type="hidden" name="items[<?= $item['code'] ?>]" value="0" class="quantity-input">
+                <input type="hidden" name="items[<?= $item['code'] ?>]" value="<?= $quantity ?>" class="quantity-input">
               </div>
             </div>
           </div>
@@ -106,7 +120,6 @@ $addons = $result->fetch_all(MYSQLI_ASSOC);
   </section>
 </main>
 <script>
-// This Javascript handles the '+' and '-' buttons for the add-ons.
 document.addEventListener('DOMContentLoaded', function() {
     const cards = document.querySelectorAll('.menu-item-card');
     cards.forEach(card => {
@@ -146,4 +159,3 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 </body>
 </html>
-
