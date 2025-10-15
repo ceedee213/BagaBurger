@@ -64,7 +64,6 @@ if (isset($_GET['error']) && $_GET['error'] === 'invalid_ref') {
             font-weight: bold;
             font-size: 14px;
             border: none;
-            /* ✅ ADDED: Prevents text from wrapping */
             white-space: nowrap;
         }
         .btn-cancel:hover {
@@ -113,7 +112,7 @@ if (isset($_GET['error']) && $_GET['error'] === 'invalid_ref') {
                         <input type="text" id="reference_number" name="reference_number" placeholder="Enter Reference Number Here" required>
                     </div>
                     <button type="submit" name="submit_reference" class="btn-primary">Submit for Confirmation</button>
-                    <a href="menu.php" class="btn-cancel">Cancel & Go Back to Menu</a>
+                    <a href="cancel_order.php?order_id=<?= $order_id ?>" class="btn-cancel" onclick="return confirm('Are you sure you want to cancel this order? It will be permanently removed.');">Cancel & Go Back to Menu</a>
                 </form>
             </div>
         </section>
