@@ -11,18 +11,23 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'owner') {
 // --- 1. Fetch Main Statistics ---
 $total_orders = $conn->query("SELECT COUNT(*) AS count FROM orders")->fetch_assoc()['count'] ?? 0;
 $total_products = $conn->query("SELECT COUNT(*) AS count FROM menu")->fetch_assoc()['count'] ?? 0;
+
+// --- MODIFIED: Lifetime Revenue (includes Completed AND Archived orders) ---
 $revenue_sql = "
     SELECT SUM(oi.quantity * oi.price_at_purchase) AS total_revenue
     FROM orders o
     JOIN order_items oi ON o.id = oi.order_id
-    WHERE o.status = 'Completed'";
+    WHERE o.status = 'Completed' OR o.status = 'Archived'";
 $total_revenue = $conn->query($revenue_sql)->fetch_assoc()['total_revenue'] ?? 0;
+
+// Shift totals remain the same, counting only 'Completed' orders for operational view
 $morning_shift_sql = "
     SELECT SUM(oi.quantity * oi.price_at_purchase) AS total
     FROM orders o
     JOIN order_items oi ON o.id = oi.order_id
     WHERE o.status = 'Completed' AND (HOUR(o.created_at) >= 6 AND HOUR(o.created_at) < 18)";
 $morning_shift_revenue = $conn->query($morning_shift_sql)->fetch_assoc()['total'] ?? 0;
+
 $night_shift_sql = "
     SELECT SUM(oi.quantity * oi.price_at_purchase) AS total
     FROM orders o
@@ -52,9 +57,7 @@ $low_stock_result = $conn->query($low_stock_sql);
   <title>👑 Owner Dashboard</title>
   <link rel="stylesheet" href="style.css"/>
   <style>
-    .dashboard-grid { display: grid; gap: 20px; grid-template-columns: repeat(1, 1fr); }
-    @media (min-width: 768px) { .dashboard-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (min-width: 1200px) { .dashboard-grid.five-cols { grid-template-columns: repeat(5, 1fr); } }
+    .dashboard-grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
     .stat-card { background: rgba(0, 0, 0, 0.4); padding: 20px; border-radius: 12px; color: white; text-align: center; }
     .stat-card .icon { font-size: 2.5em; margin-bottom: 10px; }
     .stat-card h3 { margin: 0 0 5px 0; color: #aaa; font-size: 1em; }
@@ -75,7 +78,7 @@ $low_stock_result = $conn->query($low_stock_sql);
     </div>
     <ul>
       <li><a href="owner.php" class="active">Dashboard</a></li>
-      <li><a href="MenuManagement.php">Menu Management</a></li>
+      <li><a href="MenuManagementOwner.php">Menu Management</a></li>
       <li><a href="OrderList.php">Order List</a></li>
       <li><a href="user_management.php">User Management</a></li>
       <li><a href="logout.php">Logout</a></li>
@@ -87,7 +90,7 @@ $low_stock_result = $conn->query($low_stock_sql);
     <h1>👑 Owner Dashboard</h1>
     <p style="margin-top:-10px; margin-bottom:30px;">Welcome, <?= htmlspecialchars($_SESSION['username']) ?>!</p>
     
-    <div class="dashboard-grid five-cols">
+    <div class="dashboard-grid">
         <div class="stat-card">
             <div class="icon">🍔</div>
             <h3>Total Products</h3>
@@ -100,17 +103,17 @@ $low_stock_result = $conn->query($low_stock_sql);
         </div>
         <div class="stat-card">
             <div class="icon">💰</div>
-            <h3>Total Revenue</h3>
+            <h3>Lifetime Total Revenue</h3>
             <p>₱<?= number_format($total_revenue, 2) ?></p>
         </div>
         <div class="stat-card">
             <div class="icon">☀️</div>
-            <h3>Morning Shift</h3>
+            <h3>Morning Shift Sales</h3>
             <p>₱<?= number_format($morning_shift_revenue, 2) ?></p>
         </div>
         <div class="stat-card">
             <div class="icon">🌙</div>
-            <h3>Night Shift</h3>
+            <h3>Night Shift Sales</h3>
             <p>₱<?= number_format($night_shift_revenue, 2) ?></p>
         </div>
     </div>
@@ -126,7 +129,7 @@ $low_stock_result = $conn->query($low_stock_sql);
                         <li><span><?= htmlspecialchars($item['name']) ?></span><span style="color: #ffc107; font-weight: bold;">Stock: <?= $item['stock'] ?></span></li>
                     <?php endwhile; ?>
                 </ul>
-                <a href="MenuManagement.php" class="card-link">Go to Menu Management →</a>
+                <a href="MenuManagementOwner.php" class="card-link">Go to Menu Management →</a>
             </div>
         <?php endif; ?>
 

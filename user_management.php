@@ -108,7 +108,7 @@ if ($result) {
     <div class="logo"><a href="owner.php"><img src="images.png" alt="Baga Burger Logo"></a></div>
     <ul>
       <li><a href="owner.php">Dashboard</a></li>
-      <li><a href="MenuManagement.php">Menu Management</a></li>
+      <li><a href="MenuManagementOwner.php">Menu Management</a></li>
       <li><a href="OrderList.php">Order List</a></li>
       <li><a href="user_management.php" class="active">User Management</a></li>
       <li><a href="logout.php">Logout</a></li>

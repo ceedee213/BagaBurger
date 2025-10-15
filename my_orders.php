@@ -7,42 +7,54 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+// --- ADDED: Security check for pending payments ---
+// If a payment is pending, force the user back to the payment page.
+if (isset($_SESSION['pending_order_id'])) {
+    // Exception: Only allow access if the user is submitting the reference form.
+    if (!isset($_POST['submit_reference'])) {
+        header("Location: payment.php?order_id=" . $_SESSION['pending_order_id']);
+        exit;
+    }
+}
+
+
 $user_id = $_SESSION['user_id'];
 $message = '';
 
-// This part for handling the submission is updated
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_reference'])) {
     $order_id = intval($_POST['order_id']);
     $reference = trim($_POST['reference_number']);
 
-    if (!empty($reference)) {
-        // --- CHANGE IS HERE ---
-        // This query now ONLY updates the reference number. 
-        // The status remains 'Pending Payment' for the admin to review.
+    if (!empty($reference) && preg_match('/^\d{9,13}$/', $reference)) {
         $stmt = $conn->prepare("UPDATE orders SET payment_reference = ? WHERE id = ? AND user_id = ? AND status IN ('Pending Payment', 'Wrong Reference #')");
         $stmt->bind_param("sii", $reference, $order_id, $user_id);
         
         if ($stmt->execute()) {
-             // Now we manually update the status to 'For Confirmation'
             $status_stmt = $conn->prepare("UPDATE orders SET status = 'For Confirmation' WHERE id = ?");
             $status_stmt->bind_param("i", $order_id);
             $status_stmt->execute();
             $status_stmt->close();
             $message = "✅ Success! Your reference number has been submitted for confirmation.";
+            
+            // --- ADDED: Remove the session lock after successful submission ---
+            unset($_SESSION['pending_order_id']);
         }
         $stmt->close();
+    } else {
+        header("Location: payment.php?order_id=" . $order_id . "&error=invalid_ref");
+        exit;
     }
 }
 
-// Fetch all orders and their items for the current user
+
 $sql = "
     SELECT 
         o.id AS order_id, o.created_at, o.status, o.total_amount,
-        oi.quantity, m.name AS product_name
+        oi.item_description, oi.quantity
     FROM orders AS o
     JOIN order_items AS oi ON o.id = oi.order_id
-    JOIN menu AS m ON oi.menu_id = m.id
     WHERE o.user_id = ? ORDER BY o.created_at DESC";
+
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
@@ -59,7 +71,16 @@ while ($row = $result->fetch_assoc()) {
             'items' => []
         ];
     }
-    $orders[$order_id]['items'][] = ['name' => $row['product_name'], 'quantity' => $row['quantity']];
+    // Group identical items for a cleaner display (e.g., "2x Beef Baga")
+    $item_desc = $row['item_description'];
+    if (isset($orders[$order_id]['items'][$item_desc])) {
+        $orders[$order_id]['items'][$item_desc]['quantity'] += $row['quantity'];
+    } else {
+        $orders[$order_id]['items'][$item_desc] = [
+            'name' => $item_desc, 
+            'quantity' => $row['quantity']
+        ];
+    }
 }
 $stmt->close();
 ?>
@@ -82,7 +103,6 @@ $stmt->close();
         .order-items li { display: flex; justify-content: space-between; padding: 5px 0; }
         .order-footer { background: rgba(0,0,0,0.2); padding: 15px; }
         .status-badge { padding: 5px 12px; border-radius: 15px; font-weight: bold; font-size: 0.9em; }
-        /* Status Colors */
         .status-Pending-Payment { background-color: #ffc107; color: black; }
         .status-For-Confirmation { background-color: #6f42c1; color: white; }
         .status-Wrong-Reference-\# { background-color: #dc3545; color: white; }
@@ -90,7 +110,6 @@ $stmt->close();
         .status-Ready-for-Pickup { background-color: #28a745; color: white; }
         .status-Completed { background-color: #007bff; color: white; }
         .status-Cancelled { background-color: #6c757d; color: white; }
-        /* Payment Form */
         .payment-form p { margin-top: 0; }
         .payment-form p.error-notice { color: #ffc107; font-weight: bold; }
         .payment-form input { width: calc(100% - 120px); padding: 10px; border-radius: 5px; border: 1px solid #ccc; }

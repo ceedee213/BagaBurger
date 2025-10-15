@@ -1,5 +1,9 @@
 <?php
 session_start();
+
+// --- ADD THIS LINE TO CLEAR THE CART ---
+unset($_SESSION['cart']);
+
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;

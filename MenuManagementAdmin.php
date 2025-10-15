@@ -2,9 +2,10 @@
 session_start();
 require 'db.php';
 
-// Security check
+// --- CORRECTED SECURITY CHECK ---
+// This now correctly allows both 'admin' and 'owner' roles to access the page.
 if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role'], ['admin', 'owner'])) {
-    die("Access Denied.");
+    die("Access Denied. You do not have permission to view this page.");
 }
 
 $feedback = '';
@@ -16,7 +17,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_item'])) {
     $code = trim($_POST['code']);
     $stock = intval($_POST['stock']);
     $category = trim($_POST['category']);
-    // 'created_at' uses the default value from the database
     $stmt = $conn->prepare("INSERT INTO menu (name, price, code, stock, category) VALUES (?, ?, ?, ?, ?)");
     $stmt->bind_param("sdsis", $name, $price, $code, $stock, $category);
     if ($stmt->execute()) {
@@ -35,26 +35,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_item'])) {
     $code = trim($_POST['code']);
     $stock = intval($_POST['stock']);
     $category = trim($_POST['category']);
-
     $stmt = $conn->prepare("UPDATE menu SET name=?, price=?, code=?, stock=?, category=? WHERE id=?");
     $stmt->bind_param("sdsisi", $name, $price, $code, $stock, $category, $item_id);
     if ($stmt->execute()) {
         $feedback = "<p class='feedback success'>Success: Item updated.</p>";
     } else {
         $feedback = "<p class='feedback error'>Error: Could not update item.</p>";
-    }
-    $stmt->close();
-}
-
-// --- HANDLE DELETE request ---
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_item'])) {
-    $item_id_to_delete = intval($_POST['item_id']);
-    $stmt = $conn->prepare("DELETE FROM menu WHERE id = ?");
-    $stmt->bind_param("i", $item_id_to_delete);
-    if ($stmt->execute()) {
-        $feedback = "<p class='feedback success'>Success: Item deleted.</p>";
-    } else {
-        $feedback = "<p class='feedback error'>Error: Could not delete item.</p>";
     }
     $stmt->close();
 }
@@ -112,7 +98,6 @@ $categories = $conn->query("SELECT DISTINCT category FROM menu ORDER BY category
         .menu-card-details strong { color: gold; }
         .menu-card-actions { padding: 15px; border-top: 1px solid rgba(255,255,255,0.2); display: flex; gap: 10px; }
         .btn-edit { background: #007bff; color: white; padding: 8px 15px; border-radius: 6px; text-decoration: none; cursor:pointer; border:none; font-family:inherit; font-size:inherit; }
-        .btn-delete { background: #dc3545; color: white; padding: 8px 15px; border-radius: 6px; border: none; cursor: pointer; font-family: inherit; font-size: inherit; }
         .stock-level { font-weight: bold; }
         .stock-ok { color: #28a745; }
         .stock-low { color: #ffc107; }
@@ -136,9 +121,9 @@ $categories = $conn->query("SELECT DISTINCT category FROM menu ORDER BY category
             <div class="logo"><a href="admin.php"><img src="images.png" alt="Baga Burger Logo"></a></div>
             <ul>
                 <li><a href="admin.php">Dashboard</a></li>
-                <li><a href="MenuManagement.php" class="active">Menu Management</a></li>
+                <li><a href="MenuManagementAdmin.php" class="active">Menu Management</a></li>
                 <li><a href="OrderList.php">Order List</a></li>
-                <?php if ($_SESSION['role'] === 'owner'): ?>
+                 <?php if ($_SESSION['role'] === 'owner'): ?>
                     <li><a href="user_management.php">Manage Accounts</a></li>
                 <?php endif; ?>
                 <li><a href="logout.php">Logout</a></li>
@@ -148,13 +133,11 @@ $categories = $conn->query("SELECT DISTINCT category FROM menu ORDER BY category
     <main>
         <section class="glass-section">
             <div class="page-header">
-                <h1>🍔 Menu Management</h1>
+                <h1>🍔 Menu Management (Admin)</h1>
                 <button class="btn-primary" onclick="openModal('addModal')">(+) Add New Item</button>
             </div>
-            
             <?= $feedback ?>
-
-            <form action="MenuManagement.php" method="GET" class="filter-bar">
+            <form action="MenuManagementAdmin.php" method="GET" class="filter-bar">
                 <input type="text" name="q" placeholder="Search by name..." value="<?= htmlspecialchars($search_query) ?>">
                 <select name="filter_category" onchange="this.form.submit()">
                     <option value="">All Categories</option>
@@ -190,24 +173,12 @@ $categories = $conn->query("SELECT DISTINCT category FROM menu ORDER BY category
                                 </p>
                                 <p><strong>Category:</strong> <?= htmlspecialchars($item['category']) ?></p>
                                 <p><strong>Code:</strong> <?= htmlspecialchars($item['code']) ?></p>
-                                <p><strong>Date Added:</strong> 
-                                    <?php
-                                        $createdAt = strtotime($item['created_at']);
-                                        if ($createdAt > 0) {
-                                            echo date('M d, Y', $createdAt);
-                                        } else {
-                                            echo 'N/A';
-                                        }
-                                    ?>
-                                </p>
+                                <p><strong>Date Added:</strong> <?= date('M d, Y', strtotime($item['created_at'])) ?></p>
                             </div>
                         </div>
                         <div class="menu-card-actions">
                             <button class="btn-edit" onclick="openEditModal(<?= htmlspecialchars(json_encode($item), ENT_QUOTES, 'UTF-8') ?>)">Edit</button>
-                            <form action="MenuManagement.php" method="POST" onsubmit="return confirm('Are you sure you want to delete this item?');">
-                                <input type="hidden" name="item_id" value="<?= $item['id'] ?>">
-                                <button type="submit" name="delete_item" class="btn-delete">Delete</button>
-                            </form>
+                            <!-- DELETE BUTTON IS REMOVED FOR ADMIN ROLE -->
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -221,7 +192,7 @@ $categories = $conn->query("SELECT DISTINCT category FROM menu ORDER BY category
                 <h2>Add New Menu Item</h2>
                 <span class="close-btn" onclick="closeModal('addModal')">&times;</span>
             </div>
-            <form action="MenuManagement.php" method="POST">
+            <form action="MenuManagementAdmin.php" method="POST">
                 <div class="form-group"><label>Item Name</label><input type="text" name="name" required></div>
                 <div class="form-group"><label>Price (₱)</label><input type="number" step="0.01" name="price" required></div>
                 <div class="form-group"><label>Item Code (e.g., B1)</label><input type="text" name="code" required></div>
@@ -238,7 +209,7 @@ $categories = $conn->query("SELECT DISTINCT category FROM menu ORDER BY category
                 <h2>Edit Menu Item</h2>
                 <span class="close-btn" onclick="closeModal('editModal')">&times;</span>
             </div>
-            <form action="MenuManagement.php" method="POST">
+            <form action="MenuManagementAdmin.php" method="POST">
                 <input type="hidden" id="edit-item-id" name="item_id">
                 <div class="form-group"><label>Item Name</label><input type="text" id="edit-name" name="name" required></div>
                 <div class="form-group"><label>Price (₱)</label><input type="number" step="0.01" id="edit-price" name="price" required></div>
@@ -264,7 +235,6 @@ $categories = $conn->query("SELECT DISTINCT category FROM menu ORDER BY category
             openModal('editModal');
         }
 
-        // Close modal if user clicks outside of it
         window.onclick = function(event) {
             if (event.target.classList.contains('modal')) {
                 event.target.style.display = 'none';
