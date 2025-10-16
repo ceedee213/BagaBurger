@@ -2,8 +2,7 @@
 session_start();
 require 'db.php';
 
-// --- CORRECTED SECURITY CHECK ---
-// This now correctly allows both 'admin' and 'owner' roles to access the page.
+// Security check: Allow 'admin' OR 'owner' to access this page
 if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role'], ['admin', 'owner'])) {
     die("Access Denied. You do not have permission to view this page.");
 }
@@ -96,7 +95,8 @@ $categories = $conn->query("SELECT DISTINCT category FROM menu ORDER BY category
         .menu-card-body { padding: 15px; flex-grow: 1; }
         .menu-card-details p { margin: 0 0 10px 0; }
         .menu-card-details strong { color: gold; }
-        .menu-card-actions { padding: 15px; border-top: 1px solid rgba(255,255,255,0.2); display: flex; gap: 10px; }
+        /* --- MODIFIED LINE --- */
+        .menu-card-actions { padding: 15px; border-top: 1px solid rgba(255,255,255,0.2); display: flex; gap: 10px; justify-content: center; }
         .btn-edit { background: #007bff; color: white; padding: 8px 15px; border-radius: 6px; text-decoration: none; cursor:pointer; border:none; font-family:inherit; font-size:inherit; }
         .stock-level { font-weight: bold; }
         .stock-ok { color: #28a745; }
@@ -178,7 +178,6 @@ $categories = $conn->query("SELECT DISTINCT category FROM menu ORDER BY category
                         </div>
                         <div class="menu-card-actions">
                             <button class="btn-edit" onclick="openEditModal(<?= htmlspecialchars(json_encode($item), ENT_QUOTES, 'UTF-8') ?>)">Edit</button>
-                            <!-- DELETE BUTTON IS REMOVED FOR ADMIN ROLE -->
                         </div>
                     </div>
                 <?php endforeach; ?>

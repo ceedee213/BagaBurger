@@ -37,7 +37,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $passwordHash = password_hash($password, PASSWORD_DEFAULT);
                 $token = bin2hex(random_bytes(32)); // Generate a secure token
 
-                // --- MODIFIED: Added verification_token to the query ---
                 $stmt = $conn->prepare("INSERT INTO users (username, email, contact_number, password, verification_token) VALUES (?, ?, ?, ?, ?)");
                 if (!$stmt) {
                     $error = "Database prepare error: " . $conn->error;
@@ -45,23 +44,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt->bind_param("sssss", $username, $email, $contact_number, $passwordHash, $token);
 
                     if ($stmt->execute()) {
-                        // --- NEW: Send the verification email ---
                         $mail = new PHPMailer(true);
                         try {
-                            // --- CONFIGURE YOUR EMAIL SETTINGS HERE ---
                             $mail->isSMTP();
-                            $mail->Host       = 'smtp.gmail.com'; // Your SMTP server (e.g., smtp.gmail.com for Gmail)
+                            $mail->Host       = 'smtp.gmail.com';
                             $mail->SMTPAuth   = true;
-                            // CONFIGURE YOUR EMAIL SETTINGS HERE
-                            $mail->Username   = 'clarksulit5@gmail.com'; // Your real Gmail address
-                            $mail->Password   = 'icrx kxbn sccg dfec';   // The 16-character App Password you generated
+                            $mail->Username   = 'clarksulit5@gmail.com';
+                            $mail->Password   = 'icrx kxbn sccg dfec';
                             $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
                             $mail->Port       = 465;
 
                             $mail->setFrom('no-reply@bagaburger.com', 'Baga Burger');
                             $mail->addAddress($email, $username);
 
-                            // IMPORTANT: Change this URL to your actual domain and project path
                             $verification_link = "https://bagaburger.shop/verify.php?token=$token";
                             
                             $mail->isHTML(true);
@@ -70,11 +65,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $mail->AltBody = "Copy and paste this link to verify your account: $verification_link";
 
                             $mail->send();
-                            // --- MODIFIED: Updated success message ---
                             $success = "Account created! Please check your email to activate your account.";
 
                         } catch (Exception $e) {
-                            // This will show the real error message from the mail server
                             $error = "Mailer Error: " . $mail->ErrorInfo;
                         }
                     } else {
@@ -96,45 +89,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <title>Baga Burger - Sign Up</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* Basic modal styles */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 999;
-      left: 0; top: 0;
-      width: 100%; height: 100%;
-      background-color: rgba(0,0,0,0.8);
-      justify-content: center;
-      align-items: center;
-    }
-    .modal-content {
-      background: #222;
-      color: white;
-      padding: 20px;
-      border-radius: 10px;
-      width: 80%;
-      max-width: 600px;
-      text-align: left;
-      overflow-y: auto;
-      max-height: 80vh;
-    }
-    .modal-content h3 {
-      margin-top: 0;
-      color: #ffcc00;
-    }
-    .close-btn {
-      float: right;
-      font-size: 18px;
-      cursor: pointer;
-      color: #ffcc00;
-    }
+    .modal { display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
+    .modal-content { background: #222; color: white; padding: 20px 30px; border-radius: 10px; width: 80%; max-width: 600px; text-align: left; overflow-y: auto; max-height: 80vh; }
+    .modal-content h3 { margin-top: 0; color: #ffcc00; }
+    .modal-content h4 { color: #ffcc00; margin-top: 20px; }
+    .modal-content ul { padding-left: 20px; }
+    .close-btn { float: right; font-size: 28px; font-weight: bold; cursor: pointer; color: #ffcc00; }
   </style>
 </head>
 <body class="login-body">
 
 <main class="login-page glass-login">
   <img src="images.png" alt="Baga Burger Logo" class="login-logo" />
-  <h2>Account Created!</h2>
+  <h2>Create Your Account</h2>
 
   <?php if ($error): ?>
     <p style="color: yellow;"><?= htmlspecialchars($error) ?></p>
@@ -142,7 +109,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   <?php if ($success): ?>
     <p style="color: white;"><?= $success ?></p>
-    <!-- --- MODIFICATION: ADDED THIS BUTTON --- -->
     <a href="login.php" class="btn-primary" style="text-decoration: none; margin-top: 15px;">Go to Login</a>
   <?php else: ?>
     <form method="POST" action="signup.php">
@@ -171,7 +137,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <input id="confirm" type="password" name="confirm" required />
       </div>
 
-      <!-- Terms & Conditions with Cybersecurity Notice -->
       <div class="form-group" style="text-align:left; font-size:14px; color:white; margin-top:10px;">
         <p>
           By creating an account, you acknowledge and agree to our 
@@ -192,21 +157,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <?php endif; ?>
 </main>
 
-<!-- Terms & Conditions Modal -->
+<!-- MODIFIED: Terms & Conditions Modal with Full Privacy Policy -->
 <div id="termsModal" class="modal">
   <div class="modal-content">
     <span class="close-btn" id="closeTerms">&times;</span>
-    <h3>Terms & Conditions</h3>
+    <h3>Privacy Policy for Baga Burger Verdant</h3>
+    <p><strong>Effective Date:</strong> October 16, 2025</p>
+    <p>This Privacy Policy describes how Baga Burger Verdant ("we," "us," or "our") collects, uses, and protects the personal information you provide on our website, https://bagaburger.shop/. We are committed to protecting your privacy in accordance with the Republic Act No. 10173, the Data Privacy Act of 2012.</p>
+    
+    <h4>1. Information We Collect</h4>
+    <p>We may collect the following types of personal information when you use our website, place an order, or sign up for our newsletter:</p>
+    <ul>
+        <li><strong>Personal Identification Information:</strong> Name, delivery address, email address, and mobile number.</li>
+        <li><strong>Order Information:</strong> Details of the products you purchase, order history, and special instructions.</li>
+        <li><strong>Payment Information:</strong> We use a secure third-party payment processor (GCash, Maya,). We do not store your full payment details on our servers. The information you provide is encrypted and processed by our payment partners.</li>
+        <li><strong>Technical Information:</strong> IP address, browser type, device information, and cookies, which help us improve your browsing experience.</li>
+    </ul>
+
+    <h4>2. How We Use Your Information</h4>
+    <p>We use the information we collect for the following legitimate purposes:</p>
+    <ul>
+        <li><strong>To Process Your Orders:</strong> To confirm, prepare, and deliver your food orders.</li>
+        <li><strong>To Communicate with You:</strong> To send order confirmations, delivery updates, and respond to your inquiries.</li>
+        <li><strong>To Improve Our Services:</strong> To analyze website traffic and customer preferences to enhance our menu and website functionality.</li>
+        <li><strong>For Marketing Purposes:</strong> To send you promotional materials, but only if you have given your explicit consent. You can opt-out at any time.</li>
+    </ul>
+
+    <h4>3. Data Sharing and Disclosure</h4>
+    <p>We do not sell, trade, or rent your personal information. We may share your information with trusted third parties only when necessary to provide our services, such as delivery partners and payment processors. These partners are obligated to keep your information confidential.</p>
+
+    <h4>4. Data Security</h4>
+    <p>We implement appropriate technical and organizational security measures to protect your personal data. Our website uses Secure Sockets Layer (SSL) technology to encrypt data.</p>
+
+    <h4>5. Your Rights as a Data Subject</h4>
+    <p>In accordance with the Data Privacy Act of 2012, you have the right to be informed, access, rectify, or erase your data, object to processing, and file a complaint with the National Privacy Commission (NPC). To exercise any of these rights, please contact us.</p>
+
+    <h4>6. Use of Cookies</h4>
+    <p>Our website uses "cookies" to enhance your experience, like remembering items in your cart. You can disable cookies in your browser, but this may affect website functionality.</p>
+
+    <h4>7. Changes to This Privacy Policy</h4>
+    <p>We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new policy on this page.</p>
+
+    <h4>8. Contact Us</h4>
+    <p>If you have any questions or concerns, please contact us at:</p>
     <p>
-      By creating an account with Baga Burger, you agree to follow our rules for responsible usage and 
-      the protection of your personal data. You must ensure that your login details are private and 
-      your password is strong and not shared with others. Misuse of our system or attempts to breach 
-      security are strictly prohibited.
-    </p>
-    <p style="color:#ffcc00; font-size:13px;">
-      🔒 Cybersecurity Notice: By agreeing, you confirm that you will use a secure password, protect 
-      your login details, and comply with our data protection standards. This helps safeguard your 
-      account from misuse and strengthens overall system security.
+        <strong>Baga Burger Verdant</strong><br>
+        <strong>Email:</strong> clarksulit5@gmail.com<br>
+        <strong>Phone:</strong> 0912-123-123<br>
+        <strong>Address:</strong> Verdant Ave. Pamplona Tres, Las Piñas.
     </p>
   </div>
 </div>
