@@ -7,7 +7,6 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// Unchanged from your previous code
 $sql = "SELECT code, name, price, stock, category FROM menu WHERE stock > 0 AND category != 'Add-ons' ORDER BY category, name ASC";
 $result = $conn->query($sql);
 $categorized_menu = [];
@@ -42,7 +41,6 @@ if ($result->num_rows > 0) {
     .cart-summary span { color: gold; }
     .btn-place-order { background: #28a745; color: white; padding: 12px 25px; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; font-size: 1em; text-transform: uppercase; }
     .btn-place-order:disabled { background: #6c757d; cursor: not-allowed; }
-    /* New styles for the Add button and Modal */
     .btn-add-item { background: gold; color: black; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
     .modal { display: none; position: fixed; z-index: 1001; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center; }
     .modal-content { background: #333; color: white; padding: 25px; border-radius: 15px; width: 90%; max-width: 500px; }
@@ -50,8 +48,9 @@ if ($result->num_rows > 0) {
     .modal-header h2 { margin: 0; color: gold; }
     .close-btn { font-size: 28px; font-weight: bold; cursor: pointer; }
     .addons-list { list-style: none; padding: 0; margin: 0 0 20px 0; }
-    .addons-list li { padding: 8px 0; }
-    .addons-list label { font-size: 1.1em; }
+    .addons-list li { display: flex; align-items: center; padding: 8px 0; } /* Flex for alignment */
+    .addons-list img { width: 40px; height: 40px; border-radius: 5px; margin-right: 15px; object-fit: cover; } /* Image style */
+    .addons-list label { font-size: 1.1em; flex-grow: 1; } /* Label takes remaining space */
     .modal-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
     .quantity-selector { display: flex; justify-content: center; align-items: center; gap: 15px; }
     .quantity-selector button { background: gold; color: black; border: none; width: 30px; height: 30px; border-radius: 50%; font-size: 1.2em; font-weight: bold; cursor: pointer; }
@@ -112,8 +111,7 @@ if ($result->num_rows > 0) {
         <form id="modal-form">
             <input type="hidden" id="modal-item-code" name="item_code">
             <h4>Extras:</h4>
-            <ul id="modal-addons-list" class="addons-list">
-                </ul>
+            <ul id="modal-addons-list" class="addons-list"></ul>
             <div class="modal-footer">
                 <div class="quantity-selector">
                     <button type="button" id="modal-minus-btn">-</button>
@@ -140,14 +138,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const addonList = document.getElementById('modal-addons-list');
     let availableAddons = [];
 
-    // Pre-fetch the list of available add-ons
     fetch('get_addons.php')
         .then(response => response.json())
         .then(data => {
             availableAddons = data;
         });
 
-    // Handle opening the modal
     document.querySelectorAll('.btn-add-item').forEach(button => {
         button.addEventListener('click', event => {
             const card = event.target.closest('.menu-item-card');
@@ -155,11 +151,12 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('modal-item-code').value = card.dataset.code;
             document.getElementById('modal-quantity').textContent = 1;
 
-            // Populate addons list
             addonList.innerHTML = '';
             availableAddons.forEach(addon => {
                 const li = document.createElement('li');
+                // --- MODIFIED: Added the <img> tag here ---
                 li.innerHTML = `
+                    <img src="product_images/${addon.code}.jpg" alt="${addon.name}" onerror="this.style.display='none'">
                     <label>
                         <input type="checkbox" name="addons[]" value="${addon.code}">
                         ${addon.name} (+₱${parseFloat(addon.price).toFixed(2)})
@@ -170,7 +167,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Close modal logic
     closeBtn.onclick = () => { modal.style.display = 'none'; };
     window.onclick = event => {
         if (event.target == modal) {
@@ -178,7 +174,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-    // Quantity controls in modal
     const qtyElem = document.getElementById('modal-quantity');
     document.getElementById('modal-plus-btn').onclick = () => {
         qtyElem.textContent = parseInt(qtyElem.textContent) + 1;
@@ -190,23 +185,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
     
-    // Handle form submission from modal (Add to Cart)
     document.getElementById('modal-form').addEventListener('submit', function(event) {
         event.preventDefault();
         const formData = new FormData(this);
         formData.append('quantity', document.getElementById('modal-quantity').textContent);
 
-        // Send data to a new script to update the session cart
         fetch('add_to_cart.php', {
             method: 'POST',
             body: formData
         }).then(() => {
-            updateCartSummary(); // Update the floating bar
-            modal.style.display = 'none'; // Close the modal
+            updateCartSummary();
+            modal.style.display = 'none';
         });
     });
 
-    // Update the floating cart summary
     function updateCartSummary() {
         fetch('get_cart_summary.php')
             .then(response => response.json())
@@ -218,7 +210,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
-    // Initial load of cart summary
     updateCartSummary();
 });
 </script>

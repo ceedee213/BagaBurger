@@ -2,7 +2,7 @@
 require 'db.php';
 header('Content-Type: application/json');
 
-// Fetch only items categorized as 'Add-ons'
+// --- MODIFIED: Added the 'code' column to the SELECT statement ---
 $sql = "SELECT code, name, price FROM menu WHERE stock > 0 AND category = 'Add-ons' ORDER BY name ASC";
 $result = $conn->query($sql);
 $addons = $result->fetch_all(MYSQLI_ASSOC);

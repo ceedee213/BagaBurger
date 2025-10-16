@@ -12,6 +12,22 @@ if (!isset($_SESSION['user_id'])) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Baga Burger - About Us</title>
   <link rel="stylesheet" href="style.css"/>
+  
+  <!-- --- ADDED: New styles to make all text red --- -->
+  <style>
+    .about .glass-section h1,
+    .about .glass-section h2,
+    .about .glass-section p {
+        color: #000000ff !important; /* A strong red color */
+    }
+    .about .glass-section strong {
+        color: #000000ff !important; /* A darker red for contrast */
+    }
+    .about .glass-section em {
+        color: #000000ff !important; /* A slightly different red for emphasis */
+    }
+  </style>
+
 </head>
 <body class="about">
 <header>
@@ -22,8 +38,8 @@ if (!isset($_SESSION['user_id'])) {
       </a>
     </div>
     <ul>
-      <li><a href="index.php" class="active">Home</a></li>
-      <li><a href="about.php">About Us</a></li>
+      <li><a href="index.php">Home</a></li>
+      <li><a href="about.php" class="active">About Us</a></li>
       <li><a href="preorder.php">Pre-order Now</a></li>
       <li><a href="my_orders.php">My Orders</a></li>
       <li><a href="contact.php">Contact Us</a></li>
