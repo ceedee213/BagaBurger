@@ -61,6 +61,11 @@ if ($result->num_rows > 0) {
 <header>
   <nav>
     <div class="logo"><a href="index.php"><img src="images.png" alt="Baga Burger Logo"></a></div>
+    
+    <button class="nav-toggle" aria-label="toggle navigation">
+        <span class="hamburger"></span>
+    </button>
+    
     <ul>
       <li><a href="index.php">Home</a></li>
       <li><a href="about.php">About Us</a></li>
@@ -213,5 +218,8 @@ document.addEventListener('DOMContentLoaded', function() {
     updateCartSummary();
 });
 </script>
+
+<script src="responsive.js"></script>
+
 </body>
 </html>

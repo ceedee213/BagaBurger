@@ -82,12 +82,13 @@ $categories = $conn->query("SELECT DISTINCT category FROM menu ORDER BY category
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Menu Management - Admin</title>
     <link rel="stylesheet" href="style.css" />
     <style>
-        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .filter-bar { display: flex; gap: 15px; margin-bottom: 20px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; align-items: center; }
-        .filter-bar input, .filter-bar select { padding: 10px; border-radius: 8px; border: 1px solid #555; background: #333; color: white; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;}
+        .filter-bar { display: flex; gap: 15px; margin-bottom: 20px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; align-items: center; flex-wrap: wrap; }
+        .filter-bar input, .filter-bar select { padding: 10px; border-radius: 8px; border: 1px solid #555; background: #333; color: white; flex-grow: 1; }
         .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
         .menu-card { background: rgba(0,0,0,0.4); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
         .menu-card-header { padding: 15px; background: rgba(0,0,0,0.2); }
@@ -95,7 +96,6 @@ $categories = $conn->query("SELECT DISTINCT category FROM menu ORDER BY category
         .menu-card-body { padding: 15px; flex-grow: 1; }
         .menu-card-details p { margin: 0 0 10px 0; }
         .menu-card-details strong { color: gold; }
-        /* --- MODIFIED LINE --- */
         .menu-card-actions { padding: 15px; border-top: 1px solid rgba(255,255,255,0.2); display: flex; gap: 10px; justify-content: center; }
         .btn-edit { background: #007bff; color: white; padding: 8px 15px; border-radius: 6px; text-decoration: none; cursor:pointer; border:none; font-family:inherit; font-size:inherit; }
         .stock-level { font-weight: bold; }
@@ -112,13 +112,16 @@ $categories = $conn->query("SELECT DISTINCT category FROM menu ORDER BY category
         .close-btn { color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; }
-        .form-group input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #555; background: #333; color: white; box-sizing: border-box; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #555; background: #333; color: white; box-sizing: border-box; }
     </style>
 </head>
 <body>
     <header>
         <nav>
             <div class="logo"><a href="admin.php"><img src="images.png" alt="Baga Burger Logo"></a></div>
+            <button class="nav-toggle" aria-label="toggle navigation">
+                <span class="hamburger"></span>
+            </button>
             <ul>
                 <li><a href="admin.php">Dashboard</a></li>
                 <li><a href="MenuManagementAdmin.php" class="active">Menu Management</a></li>
@@ -240,5 +243,7 @@ $categories = $conn->query("SELECT DISTINCT category FROM menu ORDER BY category
             }
         }
     </script> 
+    
+    <script src="responsive.js"></script>
 </body>
 </html>

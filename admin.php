@@ -103,6 +103,9 @@ $low_stock_result = $conn->query($low_stock_sql);
  <header>
   <nav>
     <div class="logo"><a href="admin.php"><img src="images.png" alt="Baga Burger Logo"></a></div>
+    <button class="nav-toggle" aria-label="toggle navigation">
+            <span class="hamburger"></span>
+    </button>
     <ul>
       <li><a href="admin.php" class="active">Dashboard</a></li>
       <li><a href="MenuManagementAdmin.php">Menu Management</a></li>
@@ -188,5 +191,6 @@ $low_stock_result = $conn->query($low_stock_sql);
     </div>
   </section>
 </main>
+    <script src="responsive.js"></script>
 </body>
 </html>

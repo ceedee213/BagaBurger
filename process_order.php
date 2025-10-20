@@ -13,7 +13,9 @@ $confirm = $_POST['confirm'] ?? null;
 $payment_method = $_POST['payment_method'] ?? null;
 
 if (empty($cart)) {
-    die("<p>Your cart is empty. <a href='menu.php'>Back to Menu</a></p>");
+    // Redirecting is better than a plain "die" message
+    header("Location: menu.php?error=emptycart");
+    exit;
 }
 
 // Process the complex cart for display and total calculation
@@ -78,8 +80,7 @@ if ($confirm === '1' && $payment_method) {
         $conn->commit();
         unset($_SESSION['cart']); 
 
-        // --- ADD THIS LINE ---
-        $_SESSION['pending_order_id'] = $order_id; // Set the "lock"
+        $_SESSION['pending_order_id'] = $order_id;
 
         header("Location: payment.php?order_id=" . $order_id);
         exit;
@@ -94,56 +95,95 @@ if ($confirm === '1' && $payment_method) {
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Confirm Your Order</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    .order-summary-table { width: 100%; margin-top: 20px; margin-bottom: 20px; border-collapse: collapse; text-align: left; }
-    .order-summary-table th, .order-summary-table td { padding: 10px; border-bottom: 1px solid rgba(0, 0, 0, 0.2); }
+    /* ADDED style for a scrollable table on mobile */
+    .table-container {
+        overflow-x: auto;
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+    .order-summary-table { 
+        width: 100%; 
+        border-collapse: collapse; 
+        text-align: left;
+        min-width: 500px; /* Prevents table from crushing on small screens */
+    }
+    .order-summary-table th, .order-summary-table td { 
+        padding: 12px; 
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2); 
+    }
     .order-summary-table th { color: gold; }
     .order-summary-table .price-col { text-align: right; }
     .total-row strong { font-size: 1.2em; color: gold; }
+    .payment-options { text-align:left; margin: 20px 0; }
   </style>
 </head>
-<body class="login-body">
-  <main class="glass-login" style="color:black; text-align:center; max-width: 600px;">
+<body> <header>
+  <nav>
+    <div class="logo"><a href="index.php"><img src="images.png" alt="Baga Burger Logo"></a></div>
+    <button class="nav-toggle" aria-label="toggle navigation">
+        <span class="hamburger"></span>
+    </button>
+    <ul>
+      <li><a href="menu.php">Back to Menu</a></li>
+      <li><a href="my_orders.php">My Orders</a></li>
+      <li><a href="logout.php">Logout</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main>
+  <section class="glass-section">
     <h1>Please Review Your Final Order</h1>
-    <table class="order-summary-table">
-        <thead>
-            <tr>
-                <th>Item</th>
-                <th>Quantity</th>
-                <th class="price-col">Subtotal</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($detailed_order as $item): ?>
+    
+    <div class="table-container">
+        <table class="order-summary-table">
+            <thead>
                 <tr>
-                    <td><?= htmlspecialchars($item['name']) ?></td>
-                    <td><?= $item['quantity'] ?></td>
-                    <td class="price-col">₱<?= number_format($item['subtotal'], 2) ?></td>
+                    <th>Item</th>
+                    <th>Quantity</th>
+                    <th class="price-col">Subtotal</th>
                 </tr>
-            <?php endforeach; ?>
-            <tr class="total-row">
-                <td colspan="2"><strong>Total Amount to Pay</strong></td>
-                <td class="price-col"><strong>₱<?= number_format($total_price, 2) ?></strong></td>
-            </tr>
-        </tbody>
-    </table>
-    <hr style="border-color: rgba(0,0,0,0.3);">
+            </thead>
+            <tbody>
+                <?php foreach ($detailed_order as $item): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($item['name']) ?></td>
+                        <td><?= $item['quantity'] ?></td>
+                        <td class="price-col">₱<?= number_format($item['subtotal'], 2) ?></td>
+                    </tr>
+                <?php endforeach; ?>
+                <tr class="total-row">
+                    <td colspan="2"><strong>Total Amount to Pay</strong></td>
+                    <td class="price-col"><strong>₱<?= number_format($total_price, 2) ?></strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <hr style="border-color: rgba(255,255,255,0.3);">
+
     <form action="process_order.php" method="POST">
       <input type="hidden" name="confirm" value="1" />
-      <div style="text-align:left; margin: 20px 0;">
+      <div class="payment-options">
         <h3 style="margin-bottom: 15px;">Choose Your Payment Method:</h3>
-        <label style="display:block; padding:10px; background:rgba(0,0,0,0.1); border-radius:5px; margin-bottom:10px;">
+        <label style="display:block; padding:10px; background:rgba(0,0,0,0.1); border-radius:5px; margin-bottom:10px; cursor: pointer;">
           <input type="radio" name="payment_method" value="gcash" required> GCash
         </label>
-        <label style="display:block; padding:10px; background:rgba(0,0,0,0.1); border-radius:5px;">
+        <label style="display:block; padding:10px; background:rgba(0,0,0,0.1); border-radius:5px; cursor: pointer;">
           <input type="radio" name="payment_method" value="paymaya" required> PayMaya
         </label>
       </div>
       <button type="submit" class="btn-primary">Confirm & Proceed to Payment</button>
       <a href="menu.php" class="btn-secondary" style="background:grey; color:white; padding: 10px 20px; text-decoration: none; border-radius: 8px; margin-left:10px;">Cancel</a>
     </form>
-  </main>
+  </section>
+</main>
+
+<script src="responsive.js"></script>
+
 </body>
 </html>

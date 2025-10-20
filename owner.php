@@ -66,7 +66,7 @@ $low_stock_result = $conn->query($low_stock_sql);
     @media (min-width: 1024px) { .info-card.full-width { grid-column: 1 / 3; } }
     .info-card h3 { margin-top: 0; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 10px; }
     .info-card ul { list-style: none; padding: 0; margin: 0; }
-    .info-card li { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .info-card li { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap; gap: 5px;}
     .info-card a.card-link { display: inline-block; margin-top: 15px; background: rgba(255,255,255,0.2); padding: 8px 15px; border-radius: 8px; text-decoration: none; color: white; font-weight: bold; }
   </style>
 </head>
@@ -76,6 +76,9 @@ $low_stock_result = $conn->query($low_stock_sql);
     <div class="logo">
       <a href="owner.php"><img src="images.png" alt="Baga Burger Logo"></a>
     </div>
+    <button class="nav-toggle" aria-label="toggle navigation">
+        <span class="hamburger"></span>
+    </button>
     <ul>
       <li><a href="owner.php" class="active">Dashboard</a></li>
       <li><a href="MenuManagementOwner.php">Menu Management</a></li>
@@ -147,5 +150,8 @@ $low_stock_result = $conn->query($low_stock_sql);
     </div>
   </section>
 </main>
+
+<script src="responsive.js"></script>
+
 </body>
 </html>

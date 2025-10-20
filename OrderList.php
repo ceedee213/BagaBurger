@@ -136,19 +136,20 @@ if ($stats_result) {
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Order List</title>
     <link rel="stylesheet" href="style.css" />
     <style>
         .order-dashboard { padding: 20px; }
-        .filter-bar { display: flex; gap: 15px; margin-bottom: 20px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; align-items: center; }
-        .filter-bar input, .filter-bar select { padding: 10px; border-radius: 8px; border: 1px solid #555; background: #333; color: white; }
-        .stats-bar { display: flex; gap: 20px; margin-bottom: 20px; }
-        .stat-box { background: rgba(0,0,0,0.3); padding: 15px 20px; border-radius: 10px; text-align: center; flex-grow: 1; }
+        .filter-bar { display: flex; gap: 15px; margin-bottom: 20px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; align-items: center; flex-wrap: wrap; }
+        .filter-bar input, .filter-bar select { padding: 10px; border-radius: 8px; border: 1px solid #555; background: #333; color: white; flex-grow: 1;}
+        .stats-bar { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap;}
+        .stat-box { background: rgba(0,0,0,0.3); padding: 15px 20px; border-radius: 10px; text-align: center; flex-grow: 1; min-width: 180px; }
         .stat-box h3 { margin: 0 0 5px 0; color: #aaa; font-size: 1em; }
         .stat-box p { margin: 0; font-size: 2em; font-weight: bold; color: gold; }
         .order-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
         .order-card { background: rgba(0,0,0,0.4); border-radius: 12px; border-left: 5px solid; overflow: hidden; }
-        .order-card-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: rgba(0,0,0,0.2); }
+        .order-card-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: rgba(0,0,0,0.2); flex-wrap: wrap; gap: 10px; }
         .order-card-header h3 { margin: 0; font-size: 1.2em; }
         .order-card-body { padding: 15px; }
         .order-card-details p { margin: 0 0 10px 0; color: #ddd; }
@@ -170,9 +171,12 @@ if ($stats_result) {
     <header>
         <nav>
             <div class="logo"><a href="<?= $is_owner ? 'owner.php' : 'admin.php' ?>"><img src="images.png" alt="Baga Burger Logo"></a></div>
+            <button class="nav-toggle" aria-label="toggle navigation">
+                <span class="hamburger"></span>
+            </button>
             <ul>
                 <li><a href="<?= $is_owner ? 'owner.php' : 'admin.php' ?>">Dashboard</a></li>
-                <li><a href="<?= $is_owner ? 'MenuManagementOwner.php' : 'MenuManagementAdmin.php' ?>">User Management</a></li>
+                <li><a href="<?= $is_owner ? 'MenuManagementOwner.php' : 'MenuManagementAdmin.php' ?>">Menu Management</a></li>
                 <li><a href="OrderList.php" class="active">Order List</a></li>
                 <?php if ($is_owner): ?>
                     <li><a href="user_management.php">User Management</a></li>
@@ -226,11 +230,11 @@ if ($stats_result) {
                                     </div>
                                     <div class="order-card-items"><?= $order['items_list'] ?></div>
                                     <div class="order-card-actions">
-                                        <form action="OrderList.php" method="POST" style="display:flex; gap:10px;">
+                                        <form action="OrderList.php" method="POST" style="display:flex; gap:10px; flex-wrap: wrap;">
                                             <input type="hidden" name="order_id" value="<?= $order['order_id'] ?>">
                                             <input type="hidden" name="q" value="<?= htmlspecialchars($search_query) ?>">
                                             <input type="hidden" name="filter_status" value="<?= htmlspecialchars($filter_status) ?>">
-                                            <select name="status">
+                                            <select name="status" style="flex-grow: 1; min-width: 150px; padding: 8px;">
                                                 <option value="For Confirmation" <?= $order['status'] == 'For Confirmation' ? 'selected' : '' ?>>For Confirmation</option>
                                                 <option value="Wrong Reference #" <?= $order['status'] == 'Wrong Reference #' ? 'selected' : '' ?>>Wrong Reference #</option>
                                                 <option value="Preparing" <?= $order['status'] == 'Preparing' ? 'selected' : '' ?>>Preparing</option>
@@ -241,7 +245,7 @@ if ($stats_result) {
                                                     <option value="Archived" <?= $order['status'] == 'Archived' ? 'selected' : '' ?>>Archived</option>
                                                 <?php endif; ?>
                                             </select>
-                                            <button type="submit" name="update_status">Update</button>
+                                            <button type="submit" name="update_status" class="btn-primary" style="padding: 8px 15px;">Update</button>
                                         </form>
                                     </div>
                                 </div>
@@ -252,5 +256,7 @@ if ($stats_result) {
             </div>
         </section>
     </main>
+
+    <script src="responsive.js"></script>
 </body>
 </html>

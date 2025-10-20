@@ -147,5 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   </p>
 
   </main>
+  
+  <script src="responsive.js"></script>
 </body>
 </html>

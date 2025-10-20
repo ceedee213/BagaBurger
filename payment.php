@@ -41,6 +41,7 @@ if (isset($_GET['error']) && $_GET['error'] === 'invalid_ref') {
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Complete Your Payment</title>
     <link rel="stylesheet" href="style.css" />
     <style>
@@ -60,76 +61,102 @@ if (isset($_GET['error']) && $_GET['error'] === 'invalid_ref') {
             padding: 10px 20px; 
             text-decoration: none; 
             border-radius: 8px; 
-            margin-left: 10px;
             font-weight: bold;
             font-size: 14px;
             border: none;
             white-space: nowrap;
         }
-        .btn-cancel:hover {
-            background: #c82333;
+        .btn-cancel:hover { background: #c82333; }
+
+        /* ADDED: Styles for the payment form buttons */
+        .payment-form {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px; /* Add space between buttons */
+        }
+        .payment-form .btn-primary, .payment-form .btn-cancel {
+            width: 100%;
+            max-width: 250px; /* Limit button width on larger screens */
+        }
+        
+        /* ADDED: Media query to adjust layout on larger screens if needed */
+        @media (min-width: 500px) {
+            .payment-form {
+                flex-wrap: nowrap; /* Keep buttons side-by-side on wider screens */
+            }
+            .payment-form .btn-primary, .payment-form .btn-cancel {
+                width: auto;
+            }
         }
     </style>
 </head>
 <body>
-    <header>
-        <nav>
-            <div class="logo"><a href="index.php"><img src="images.png" alt="Baga Burger Logo"></a></div>
-            <ul>
-                <li><a href="logout.php">Logout</a></li>
-            </ul>
-        </nav>
-    </header>
-    <main>
-        <section class="glass-section">
-            <div class="payment-card">
-                <h2>✅ Order Placed! Please Complete Your Payment</h2>
-                <p class="total">Total Amount: ₱<?= number_format($order['total_amount'], 2) ?></p>
-                <hr>
+<header>
+    <nav>
+        <div class="logo"><a href="index.php"><img src="images.png" alt="Baga Burger Logo"></a></div>
+        <button class="nav-toggle" aria-label="toggle navigation">
+            <span class="hamburger"></span>
+        </button>
+        <ul>
+            <li><a href="my_orders.php">My Orders</a></li>
+            <li><a href="logout.php">Logout</a></li>
+        </ul>
+    </nav>
+</header>
+<main>
+    <section class="glass-section">
+        <div class="payment-card">
+            <h2>✅ Order Placed! Please Complete Your Payment</h2>
+            <p class="total">Total Amount: ₱<?= number_format($order['total_amount'], 2) ?></p>
+            <hr>
 
-                <?php if ($order['payment_method'] === 'gcash'): ?>
-                    <h3>Scan to Pay with GCash</h3>
-                    <img src="gcash_qr.png" alt="GCash QR Code" class="qr-code">
-                    <div class="payment-details">
-                        <p>Or send manually to:</p>
-                        <p>Account Name: <strong>CL**K DU*E S.</strong></p>
-                        <p>Account Number: <strong>0926-683-3266</strong></p>
-                    </div>
-                <?php endif; ?>
+            <?php if ($order['payment_method'] === 'gcash'): ?>
+                <h3>Scan to Pay with GCash</h3>
+                <img src="gcash_qr.png" alt="GCash QR Code" class="qr-code">
+                <div class="payment-details">
+                    <p>Or send manually to:</p>
+                    <p>Account Name: <strong>CL**K DU*E S.</strong></p>
+                    <p>Account Number: <strong>0926-683-3266</strong></p>
+                </div>
+            <?php endif; ?>
 
-                <hr>
-                
-                <h3>Step 2: Submit Your Payment Reference</h3>
-                <p>After paying, enter the reference number from the receipt below.</p>
-                
-                <?php if ($error_message): ?>
-                    <p class="error-notice"><?= $error_message ?></p>
-                <?php endif; ?>
+            <hr>
+            
+            <h3>Step 2: Submit Your Payment Reference</h3>
+            <p>After paying, enter the reference number from the receipt below.</p>
+            
+            <?php if ($error_message): ?>
+                <p class="error-notice"><?= $error_message ?></p>
+            <?php endif; ?>
 
-                <form action="my_orders.php" method="POST" style="max-width:450px; margin:auto; display: flex; flex-wrap: wrap; justify-content: center;" onsubmit="return validateReference()">
-                    <input type="hidden" name="order_id" value="<?= $order_id ?>">
-                    <div class="form-group" style="width: 100%; margin-bottom: 20px;">
-                        <input type="text" id="reference_number" name="reference_number" placeholder="Enter Reference Number Here" required>
-                    </div>
-                    <button type="submit" name="submit_reference" class="btn-primary">Submit for Confirmation</button>
-                    <a href="cancel_order.php?order_id=<?= $order_id ?>" class="btn-cancel" onclick="return confirm('Are you sure you want to cancel this order? It will be permanently removed.');">Cancel & Go Back to Menu</a>
-                </form>
-            </div>
-        </section>
-    </main>
+            <form action="my_orders.php" method="POST" class="payment-form" onsubmit="return validateReference()">
+                <input type="hidden" name="order_id" value="<?= $order_id ?>">
+                <div class="form-group" style="width: 100%; margin-bottom: 10px;">
+                    <input type="text" id="reference_number" name="reference_number" placeholder="Enter Reference Number Here" required>
+                </div>
+                <button type="submit" name="submit_reference" class="btn-primary">Submit for Confirmation</button>
+                <a href="cancel_order.php?order_id=<?= $order_id ?>" class="btn-cancel" onclick="return confirm('Are you sure you want to cancel this order? It will be permanently removed.');">Cancel Order</a>
+            </form>
+        </div>
+    </section>
+</main>
 
-    <script>
-        function validateReference() {
-            const refInput = document.getElementById('reference_number');
-            const refValue = refInput.value.trim();
-            const isValid = /^\d{9,13}$/.test(refValue);
-            if (!isValid) {
-                alert('Invalid Reference Number!\nPlease enter a valid 9 to 13-digit number.');
-                refInput.focus();
-                return false;
-            }
-            return true;
+<script>
+    function validateReference() {
+        const refInput = document.getElementById('reference_number');
+        const refValue = refInput.value.trim();
+        const isValid = /^\d{9,13}$/.test(refValue);
+        if (!isValid) {
+            alert('Invalid Reference Number!\nPlease enter a valid 9 to 13-digit number.');
+            refInput.focus();
+            return false;
         }
-    </script>
+        return true;
+    }
+</script>
+
+<script src="responsive.js"></script>
+
 </body>
 </html>

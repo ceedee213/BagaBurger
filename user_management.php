@@ -46,7 +46,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_user'])) {
             $feedback = "<p class='feedback error'>Error: Username or email is already taken.</p>";
         } else {
             $password_hash = password_hash($password, PASSWORD_DEFAULT);
-            // --- MODIFIED: Added is_active and is_verified columns ---
             // Accounts created by the owner are activated immediately.
             $stmt = $conn->prepare("INSERT INTO users (username, email, password, role, is_active, is_verified) VALUES (?, ?, ?, ?, 1, 1)");
             $stmt->bind_param("ssss", $username, $email, $password_hash, $role);
@@ -72,10 +71,11 @@ if ($result) {
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>User Management - Owner</title>
     <link rel="stylesheet" href="style.css" />
     <style>
-        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
         .user-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
         .user-card { background: rgba(0,0,0,0.4); border-radius: 12px; overflow: hidden; }
         .user-card-header { padding: 15px; background: rgba(0,0,0,0.2); border-left: 5px solid; }
@@ -100,12 +100,16 @@ if ($result) {
         .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #555; padding-bottom: 15px; margin-bottom: 20px; }
         .modal-header h2 { margin: 0; }
         .close-btn { color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .form-group select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #555; background: #333; color: white; }
     </style>
 </head>
 <body>
 <header>
   <nav>
     <div class="logo"><a href="owner.php"><img src="images.png" alt="Baga Burger Logo"></a></div>
+    <button class="nav-toggle" aria-label="toggle navigation">
+        <span class="hamburger"></span>
+    </button>
     <ul>
       <li><a href="owner.php">Dashboard</a></li>
       <li><a href="MenuManagementOwner.php">Menu Management</a></li>
@@ -168,7 +172,7 @@ if ($result) {
             <div class="form-group"><label>Password</label><input type="password" name="password" required></div>
             <div class="form-group">
                 <label>Role</label>
-                <select name="role" required class="form-group input" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #555; background: #333; color: white;">
+                <select name="role" required>
                     <option value="user">User</option>
                     <option value="admin">Admin</option>
                 </select>
@@ -187,5 +191,8 @@ if ($result) {
         }
     }
 </script>
+
+<script src="responsive.js"></script>
+
 </body>
 </html>
