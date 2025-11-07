@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'])) {
                 $mail->addAddress($email, $user['username']);
 
                 // Construct the verification link
-                $verification_link = "http://localhost/baga-burger/verify.php?token=$token";
+                $verification_link = "https://bagaburger.shop/verify.php?token=$token";
                 
                 $mail->isHTML(true);
                 $mail->Subject = 'Verify Your Baga Burger Account';

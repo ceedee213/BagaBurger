@@ -46,7 +46,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_user'])) {
             $feedback = "<p class='feedback error'>Error: Username or email is already taken.</p>";
         } else {
             $password_hash = password_hash($password, PASSWORD_DEFAULT);
-            // Accounts created by the owner are activated immediately.
             $stmt = $conn->prepare("INSERT INTO users (username, email, password, role, is_active, is_verified) VALUES (?, ?, ?, ?, 1, 1)");
             $stmt->bind_param("ssss", $username, $email, $password_hash, $role);
             if ($stmt->execute()) {
@@ -73,7 +72,9 @@ if ($result) {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>User Management - Owner</title>
+    <link rel="icon" type="image/png" href="images.png">
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
     <style>
         .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
         .user-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
@@ -87,14 +88,12 @@ if ($result) {
         .feedback { padding: 15px; border-radius: 8px; margin-bottom: 20px; color: white; }
         .feedback.success { background: #28a745; }
         .feedback.error { background: #dc3545; }
-        /* Role and Status Styles */
         .role-owner { border-left-color: gold; }
         .role-admin { border-left-color: #dc3545; }
         .role-user { border-left-color: #007bff; }
         .status-badge { display: inline-block; padding: 5px 12px; border-radius: 15px; font-weight: bold; font-size: 0.9em; }
         .status-active { background: #28a745; color: white; }
         .status-inactive { background: #6c757d; color: white; }
-        /* Modal Styles */
         .modal { display: none; position: fixed; z-index: 1001; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); }
         .modal-content { background-color: #2c2c2c; margin: 10% auto; padding: 25px; border-radius: 12px; width: 90%; max-width: 500px; color: white; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #555; padding-bottom: 15px; margin-bottom: 20px; }
@@ -105,20 +104,37 @@ if ($result) {
 </head>
 <body>
 <header>
-  <nav>
-    <div class="logo"><a href="owner.php"><img src="images.png" alt="Baga Burger Logo"></a></div>
-    <button class="nav-toggle" aria-label="toggle navigation">
-        <span class="hamburger"></span>
-    </button>
-    <ul>
-      <li><a href="owner.php">Dashboard</a></li>
-      <li><a href="MenuManagementOwner.php">Menu Management</a></li>
-      <li><a href="OrderList.php">Order List</a></li>
-      <li><a href="user_management.php" class="active">User Management</a></li>
-      <li><a href="logout.php">Logout</a></li>
-    </ul>
-  </nav>
+    <nav class="desktop-nav">
+        <div class="logo">
+            <a href="owner.php"><img src="images.png" alt="Baga Burger Logo"></a>
+        </div>
+        <ul>
+            <li><a href="owner.php">Dashboard</a></li>
+            <li><a href="InventoryManagementOwner.php">Inventory</a></li>
+            <li><a href="OrderList.php">Order List</a></li>
+            <li><a href="user_management.php" class="active">Users</a></li>
+            <li><a href="logout.php">Logout</a></li>
+        </ul>
+    </nav>
+    <div class="mobile-header">
+        <div class="logo">
+            <a href="owner.php"><img src="images.png" alt="Baga Burger Logo"></a>
+        </div>
+        <button class="menu-toggle" aria-label="Open Menu"><i class="fas fa-bars"></i></button>
+    </div>
 </header>
+
+<div id="mobile-overlay" class="overlay">
+  <a href="javascript:void(0)" class="closebtn" aria-label="Close Menu">&times;</a>
+  <div class="overlay-content">
+    <a href="owner.php" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+    <a href="InventoryManagementOwner.php" class="nav-link"><i class="fas fa-boxes"></i> Inventory</a>
+    <a href="OrderList.php" class="nav-link"><i class="fas fa-clipboard-list"></i> Order List</a>
+    <a href="user_management.php" class="nav-link"><i class="fas fa-users-cog"></i> User Management</a>
+    <a href="logout.php" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+  </div>
+</div>
+
 <main>
     <section class="glass-section">
         <div class="page-header">
@@ -190,9 +206,14 @@ if ($result) {
             event.target.style.display = 'none';
         }
     }
-</script>
 
-<script src="responsive.js"></script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const openNav = () => document.getElementById("mobile-overlay").style.height = "100%";
+        const closeNav = () => document.getElementById("mobile-overlay").style.height = "0%";
+        document.querySelector('.menu-toggle').addEventListener('click', openNav);
+        document.querySelector('.closebtn').addEventListener('click', closeNav);
+    });
+</script>
 
 </body>
 </html>

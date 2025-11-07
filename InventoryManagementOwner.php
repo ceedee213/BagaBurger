@@ -9,9 +9,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'owner') {
 
 $feedback = '';
 
-// --- ALL PHP LOGIC FOR ADD, UPDATE, DELETE, and SEARCH REMAINS THE SAME ---
-// [Existing PHP code for handling POST requests and fetching data...]
-// --- HANDLE ADD NEW ITEM ---
+// --- Form handling and data fetching logic remains the same ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_item'])) {
     $name = trim($_POST['name']);
     $price = floatval($_POST['price']);
@@ -27,7 +25,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_item'])) {
     }
     $stmt->close();
 }
-// --- HANDLE UPDATE ITEM ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_item'])) {
     $item_id = intval($_POST['item_id']);
     $name = trim($_POST['name']);
@@ -44,7 +41,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_item'])) {
     }
     $stmt->close();
 }
-// --- HANDLE DELETE request (Only for Owner) ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_item'])) {
     $item_id_to_delete = intval($_POST['item_id']);
     $stmt = $conn->prepare("DELETE FROM menu WHERE id = ?");
@@ -56,7 +52,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_item'])) {
     }
     $stmt->close();
 }
-// --- Search and Filter Logic ---
 $search_query = $_GET['q'] ?? '';
 $filter_category = $_GET['filter_category'] ?? '';
 $where_clauses = [];
@@ -73,8 +68,6 @@ if (!empty($filter_category)) {
     $types .= 's';
 }
 $where_sql = count($where_clauses) > 0 ? "WHERE " . implode(' AND ', $where_clauses) : '';
-// Fetch all menu items for display
-$menu_items = [];
 $sql = "SELECT id, name, price, code, stock, category, created_at FROM menu $where_sql ORDER BY category, name ASC";
 $stmt = $conn->prepare($sql);
 if (count($params) > 0) {
@@ -84,7 +77,6 @@ $stmt->execute();
 $result = $stmt->get_result();
 $menu_items = $result->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
-// Fetch categories for the filter dropdown
 $categories = $conn->query("SELECT DISTINCT category FROM menu ORDER BY category ASC")->fetch_all(MYSQLI_ASSOC);
 ?>
 <!DOCTYPE html>
@@ -92,8 +84,10 @@ $categories = $conn->query("SELECT DISTINCT category FROM menu ORDER BY category
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Menu Management - Owner</title>
+    <title>Inventory Management - Owner</title>
+    <link rel="icon" type="image/png" href="images.png">
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
     <style>
         .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
         .filter-bar { display: flex; gap: 15px; margin-bottom: 20px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; align-items: center; flex-wrap: wrap; }
@@ -127,29 +121,46 @@ $categories = $conn->query("SELECT DISTINCT category FROM menu ORDER BY category
 </head>
 <body>
     <header>
-        <nav>
-            <div class="logo"><a href="owner.php"><img src="images.png" alt="Baga Burger Logo"></a></div>
-            <button class="nav-toggle" aria-label="toggle navigation">
-                <span class="hamburger"></span>
-            </button>
+        <nav class="desktop-nav">
+            <div class="logo">
+                <a href="owner.php"><img src="images.png" alt="Baga Burger Logo"></a>
+            </div>
             <ul>
                 <li><a href="owner.php">Dashboard</a></li>
-                <li><a href="MenuManagementOwner.php" class="active">Menu Management</a></li>
+                <li><a href="InventoryManagementOwner.php" class="active">Inventory</a></li>
                 <li><a href="OrderList.php">Order List</a></li>
-                <li><a href="user_management.php">User Management</a></li>
+                <li><a href="user_management.php">Users</a></li>
                 <li><a href="logout.php">Logout</a></li>
             </ul>
         </nav>
+        <div class="mobile-header">
+            <div class="logo">
+                <a href="owner.php"><img src="images.png" alt="Baga Burger Logo"></a>
+            </div>
+            <button class="menu-toggle" aria-label="Open Menu"><i class="fas fa-bars"></i></button>
+        </div>
     </header>
+
+    <div id="mobile-overlay" class="overlay">
+      <a href="javascript:void(0)" class="closebtn" aria-label="Close Menu">&times;</a>
+      <div class="overlay-content">
+        <a href="owner.php" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="InventoryManagementOwner.php" class="nav-link"><i class="fas fa-boxes"></i> Inventory</a>
+        <a href="OrderList.php" class="nav-link"><i class="fas fa-clipboard-list"></i> Order List</a>
+        <a href="user_management.php" class="nav-link"><i class="fas fa-users-cog"></i> User Management</a>
+        <a href="logout.php" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+      </div>
+    </div>
+
     <main>
         <section class="glass-section">
             <div class="page-header">
-                <h1>🍔 Menu Management (Owner)</h1>
+                <h1>📦 Inventory Management (Owner)</h1>
                 <button class="btn-primary" onclick="openModal('addModal')">(+) Add New Item</button>
             </div>
             <?= $feedback ?>
             
-            <form action="MenuManagementOwner.php" method="GET" class="filter-bar">
+            <form action="InventoryManagementOwner.php" method="GET" class="filter-bar">
                 <input type="text" name="q" placeholder="Search by name..." value="<?= htmlspecialchars($search_query) ?>">
                 <select name="filter_category" onchange="this.form.submit()">
                     <option value="">All Categories</option>
@@ -190,7 +201,7 @@ $categories = $conn->query("SELECT DISTINCT category FROM menu ORDER BY category
                         </div>
                         <div class="menu-card-actions">
                             <button class="btn-edit" onclick="openEditModal(<?= htmlspecialchars(json_encode($item), ENT_QUOTES, 'UTF-8') ?>)">Edit</button>
-                            <form action="MenuManagementOwner.php" method="POST" onsubmit="return confirm('Are you sure you want to delete this item?');">
+                            <form action="InventoryManagementOwner.php" method="POST" onsubmit="return confirm('Are you sure you want to delete this item?');">
                                 <input type="hidden" name="item_id" value="<?= $item['id'] ?>">
                                 <button type="submit" name="delete_item" class="btn-delete">Delete</button>
                             </form>
@@ -204,13 +215,13 @@ $categories = $conn->query("SELECT DISTINCT category FROM menu ORDER BY category
     <div id="addModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Add New Menu Item</h2>
+                <h2>Add New Item</h2>
                 <span class="close-btn" onclick="closeModal('addModal')">&times;</span>
             </div>
-            <form action="MenuManagementOwner.php" method="POST">
+            <form action="InventoryManagementOwner.php" method="POST">
                 <div class="form-group"><label>Item Name</label><input type="text" name="name" required></div>
                 <div class="form-group"><label>Price (₱)</label><input type="number" step="0.01" name="price" required></div>
-                <div class="form-group"><label>Item Code (e.g., B1)</label><input type="text" name="code" required></div>
+                <div class="form-group"><label>Item Code</label><input type="text" name="code" required></div>
                 <div class="form-group"><label>Initial Stock</label><input type="number" name="stock" required></div>
                 <div class="form-group"><label>Category</label><input type="text" name="category" required></div>
                 <button type="submit" name="add_item" class="btn-primary">Add Item</button>
@@ -220,10 +231,10 @@ $categories = $conn->query("SELECT DISTINCT category FROM menu ORDER BY category
     <div id="editModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Edit Menu Item</h2>
+                <h2>Edit Item</h2>
                 <span class="close-btn" onclick="closeModal('editModal')">&times;</span>
             </div>
-            <form action="MenuManagementOwner.php" method="POST">
+            <form action="InventoryManagementOwner.php" method="POST">
                 <input type="hidden" id="edit-item-id" name="item_id">
                 <div class="form-group"><label>Item Name</label><input type="text" id="edit-name" name="name" required></div>
                 <div class="form-group"><label>Price (₱)</label><input type="number" step="0.01" id="edit-price" name="price" required></div>
@@ -234,6 +245,7 @@ $categories = $conn->query("SELECT DISTINCT category FROM menu ORDER BY category
             </form>
         </div>
     </div>
+    
     <script>
         function openModal(modalId) { document.getElementById(modalId).style.display = 'block'; }
         function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
@@ -251,8 +263,13 @@ $categories = $conn->query("SELECT DISTINCT category FROM menu ORDER BY category
                 event.target.style.display = 'none';
             }
         }
+        
+        document.addEventListener("DOMContentLoaded", () => {
+            const openNav = () => document.getElementById("mobile-overlay").style.height = "100%";
+            const closeNav = () => document.getElementById("mobile-overlay").style.height = "0%";
+            document.querySelector('.menu-toggle').addEventListener('click', openNav);
+            document.querySelector('.closebtn').addEventListener('click', closeNav);
+        });
     </script> 
-    
-    <script src="responsive.js"></script>
 </body>
 </html>

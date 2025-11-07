@@ -1,8 +1,19 @@
 <?php
 session_start();
+require 'db.php'; 
+
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
+}
+
+$feedback_message = '';
+if (isset($_GET['feedback'])) {
+    if ($_GET['feedback'] === 'success') {
+        $feedback_message = "<p class='feedback-notice success'>✅ Thank you for your feedback!</p>";
+    } else {
+        $feedback_message = "<p class='feedback-notice error'>❌ There was an error submitting your feedback. Please try again.</p>";
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -10,10 +21,24 @@ if (!isset($_SESSION['user_id'])) {
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Baga Burger - Contact Us</title>
+    <title>Feedback - Baga Burger</title>
     <link rel="icon" type="image/png" href="images.png">
     <link rel="stylesheet" href="style.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+    <style>
+        .feedback-section { padding: 50px 40px; }
+        .feedback-form { max-width: 600px; margin: 30px auto 0; text-align: left; }
+        .star-rating { display: flex; flex-direction: row-reverse; justify-content: center; margin-bottom: 20px; }
+        .star-rating input[type="radio"] { display: none; }
+        .star-rating label { font-size: 2.5em; color: #444; cursor: pointer; transition: color 0.2s; padding: 0 5px; }
+        .star-rating input[type="radio"]:checked ~ label,
+        .star-rating:not(:checked) > label:hover,
+        .star-rating:not(:checked) > label:hover ~ label { color: gold; }
+        .feedback-form textarea { width: 100%; height: 120px; padding: 10px; border-radius: 8px; border: none; background-color: rgba(255, 255, 255, 0.85); font-size: 1em; box-sizing: border-box; margin-bottom: 20px; }
+        .feedback-notice { text-align: center; font-weight: bold; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .feedback-notice.success { background: #28a745; color: white; }
+        .feedback-notice.error { background: #dc3545; color: white; }
+    </style>
 </head>
 <body class="full-content-page">
 
@@ -27,12 +52,11 @@ if (!isset($_SESSION['user_id'])) {
             <li><a href="about.php">About Us</a></li>
             <li><a href="preorder.php">How to Order</a></li>
             <li><a href="my_orders.php">My Orders</a></li>
-            <li><a href="contact.php" class="active">Contact Us</a></li>
-            <li><a href="feedback.php">Feedback</a></li>
+            <li><a href="contact.php">Contact Us</a></li>
+            <li><a href="feedback.php" class="active">Feedback</a></li>
             <li><a href="logout.php" onclick="return confirm('Are you sure you want to log out?')">Logout</a></li>
         </ul>
     </nav>
-
     <div class="mobile-header">
         <div class="logo">
             <a href="index.php"><img src="images.png" alt="Baga Burger Logo"></a>
@@ -55,30 +79,27 @@ if (!isset($_SESSION['user_id'])) {
 </div>
 
 <main>
-    <section class="glass-section">
-        <h1>Contact Us</h1>
-        <p>If you have any questions, feedback, or special requests, feel free to reach out!</p>
+    <section class="glass-section feedback-section" id="feedback-section">
+        <h2>Rate Your Website Experience</h2>
+        <p>Your feedback helps us improve our service. Please let us know how we did!</p>
+        
+        <?= $feedback_message ?>
 
-        <?php if (isset($_GET['sent']) && $_GET['sent'] == 1): ?>
-            <p style="color: lightgreen; font-weight: bold; text-align: center;">
-                ✅ Thank you! Your message has been sent successfully.
-            </p>
-        <?php endif; ?>
-
-        <form action="save_contact.php" method="POST" style="max-width:500px; margin:auto; text-align:left;">
-            <div class="form-group">
-                <label for="name">Full Name</label>
-                <input type="text" id="name" name="name" placeholder="Enter your name" required />
+        <form action="submit_feedback.php" method="POST" class="feedback-form">
+            <div class="star-rating">
+                <input type="radio" id="star5" name="rating" value="5" required/><label for="star5" title="5 stars"><i class="fas fa-star"></i></label>
+                <input type="radio" id="star4" name="rating" value="4" /><label for="star4" title="4 stars"><i class="fas fa-star"></i></label>
+                <input type="radio" id="star3" name="rating" value="3" /><label for="star3" title="3 stars"><i class="fas fa-star"></i></label>
+                <input type="radio" id="star2" name="rating" value="2" /><label for="star2" title="2 stars"><i class="fas fa-star"></i></label>
+                <input type="radio" id="star1" name="rating" value="1" /><label for="star1" title="1 star"><i class="fas fa-star"></i></label>
             </div>
             <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" name="email" placeholder="Enter your email" required />
+                <label for="comment" style="margin-bottom: 10px;">Additional Comments (Optional):</label>
+                <textarea id="comment" name="comment" placeholder="Tell us more..."></textarea>
             </div>
-            <div class="form-group">
-                <label for="message">Message</label>
-                <textarea id="message" name="message" rows="5" required></textarea>
+            <div style="text-align: center;">
+                <button type="submit" class="btn-primary">Submit Feedback</button>
             </div>
-            <button type="submit" class="btn-primary">Send Message</button>
         </form>
     </section>
 </main>
@@ -119,13 +140,19 @@ if (!isset($_SESSION['user_id'])) {
         <p>&copy; <?php echo date("Y"); ?> Baga Burger. All Rights Reserved.</p>
     </div>
 </footer>
-
+ 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
     const openNav = () => document.getElementById("mobile-overlay").style.height = "100%";
     const closeNav = () => document.getElementById("mobile-overlay").style.height = "0%";
     document.querySelector('.menu-toggle').addEventListener('click', openNav);
     document.querySelector('.closebtn').addEventListener('click', closeNav);
+
+    if (window.location.search.includes('feedback=')) {
+        setTimeout(() => {
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }, 3000);
+    }
 });
 </script>
 

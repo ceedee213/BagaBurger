@@ -11,6 +11,7 @@ if (!isset($_SESSION['user_id'])) {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Baga Burger - About Us</title>
+    <link rel="icon" type="image/png" href="images.png">
     <link rel="stylesheet" href="style.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
   
@@ -18,38 +19,73 @@ if (!isset($_SESSION['user_id'])) {
         .about .glass-section h1,
         .about .glass-section h2,
         .about .glass-section p {
-            color: #000000ff !important;
+            color: white !important;
         }
         .about .glass-section strong {
-            color: #000000ff !important;
+            color: white !important;
         }
         .about .glass-section em {
-            color: #000000ff !important;
+            color: white !important;
+        }
+        .about-video {
+            width: 100%;
+            max-width: 450px;
+            margin: 20px auto 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(172, 19, 19, 0.3);
+        }
+        .about-video video {
+            width: 100%;
+            height: auto;
+            display: block;
         }
     </style>
 
 </head>
 <body class="about">
+
 <header>
-    <nav>
+    <nav class="desktop-nav">
         <div class="logo">
             <a href="index.php">
-                <img src="images.png" alt="Baga Burger Logo" />
+                <img src="images.png" alt="Baga Burger Logo">
             </a>
         </div>
-        <button class="nav-toggle" aria-label="toggle navigation">
-            <span class="hamburger"></span>
-        </button>
         <ul>
             <li><a href="index.php">Home</a></li>
             <li><a href="about.php" class="active">About Us</a></li>
-            <li><a href="preorder.php">Pre-order Now</a></li>
+            <li><a href="preorder.php">How to Order</a></li>
             <li><a href="my_orders.php">My Orders</a></li>
             <li><a href="contact.php">Contact Us</a></li>
+            <li><a href="feedback.php">Feedback</a></li>
             <li><a href="logout.php" onclick="return confirm('Are you sure you want to log out?')">Logout</a></li>
         </ul>
     </nav>
+
+    <div class="mobile-header">
+        <div class="logo">
+            <a href="index.php"><img src="images.png" alt="Baga Burger Logo"></a>
+        </div>
+        <button class="menu-toggle" aria-label="Open Menu">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
 </header>
+
+<div id="mobile-overlay" class="overlay">
+  <a href="javascript:void(0)" class="closebtn" aria-label="Close Menu">&times;</a>
+  <div class="overlay-content">
+    <a href="index.php" class="nav-link"><i class="fas fa-home"></i> Home</a>
+    <a href="about.php" class="nav-link"><i class="fas fa-info-circle"></i> About Us</a>
+    <a href="preorder.php" class="nav-link"><i class="fas fa-shopping-cart"></i> How to Order</a>
+    <a href="my_orders.php" class="nav-link"><i class="fas fa-history"></i> My Orders</a>
+    <a href="contact.php" class="nav-link"><i class="fas fa-envelope"></i> Contact Us</a>
+    <a href="feedback.php" class="nav-link"><i class="fas fa-star"></i>FeedBack</a>
+    <a href="logout.php" class="nav-link" onclick="return confirm('Are you sure you want to log out?')"><i class="fas fa-sign-out-alt"></i> Logout</a>
+  </div>
+</div>
+
 
 <main>
     <section class="glass-section">
@@ -118,26 +154,15 @@ if (!isset($_SESSION['user_id'])) {
     </div>
 </footer>
 
-<?php if (isset($_GET['updated']) && $_GET['updated'] == 1): ?>
-    <div class="popup-overlay">
-        <div class="popup-box">
-            <h3>✅ Update Successful!</h3>
-            <p>Your information has been updated.</p>
-            <button class="popup-btn" onclick="closePopup()">OK</button>
-        </div>
-    </div>
-    <script>
-        function closePopup() {
-            document.querySelector('.popup-overlay').style.display = 'none';
-            window.history.replaceState({}, document.title, "about.php");
-        }
-    </script>
-<?php endif; ?>
-
-<script src="responsive.js"></script>
-
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+    // Mobile Navigation Logic
+    const openNav = () => document.getElementById("mobile-overlay").style.height = "100%";
+    const closeNav = () => document.getElementById("mobile-overlay").style.height = "0%";
+    document.querySelector('.menu-toggle').addEventListener('click', openNav);
+    document.querySelector('.closebtn').addEventListener('click', closeNav);
+
+    // Footer Animation Logic
     const observer = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
             if (entry.isIntersecting) {
@@ -148,7 +173,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }, {
         threshold: 0.1
     });
-
     const footerSections = document.querySelectorAll(".footer-section");
     footerSections.forEach((section) => {
         observer.observe(section);

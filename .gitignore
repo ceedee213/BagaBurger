@@ -1,0 +1,6 @@
+# Ignore the secret credentials file
+config.php
+
+# You should also ignore the 'vendor' directory
+# (which is created by Composer)
+vendor/

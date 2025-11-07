@@ -13,20 +13,21 @@ $confirm = $_POST['confirm'] ?? null;
 $payment_method = $_POST['payment_method'] ?? null;
 
 if (empty($cart)) {
-    // Redirecting is better than a plain "die" message
     header("Location: menu.php?error=emptycart");
     exit;
 }
 
-// Process the complex cart for display and total calculation
+// Process the cart for display and total calculation
 $total_price = 0;
 $detailed_order = [];
 foreach ($cart as $unique_id => $item) {
     $item_price = floatval($item['price']);
     $addon_names = [];
-    foreach ($item['addons'] as $addon) {
-        $item_price += floatval($addon['price']);
-        $addon_names[] = $addon['name'];
+    if(!empty($item['addons'])) {
+        foreach ($item['addons'] as $addon) {
+            $item_price += floatval($addon['price']);
+            $addon_names[] = $addon['name'];
+        }
     }
     
     $description = $item['name'];
@@ -34,7 +35,6 @@ foreach ($cart as $unique_id => $item) {
         $description .= ' (w/ ' . implode(', ', $addon_names) . ')';
     }
 
-    // Group identical items for display
     if (isset($detailed_order[$description])) {
         $detailed_order[$description]['quantity']++;
         $detailed_order[$description]['subtotal'] += $item_price;
@@ -58,28 +58,17 @@ if ($confirm === '1' && $payment_method) {
         $order_id = $conn->insert_id;
         $order_stmt->close();
         
-        $item_stmt = $conn->prepare("INSERT INTO order_items (order_id, item_description, quantity, price_at_purchase) VALUES (?, ?, 1, ?)");
-        
-        // Save each unique item to the database
-        foreach ($cart as $item) {
-            $item_price = floatval($item['price']);
-            $addon_names = [];
-            foreach ($item['addons'] as $addon) {
-                $item_price += floatval($addon['price']);
-                $addon_names[] = $addon['name'];
-            }
-            $description = $item['name'];
-            if (!empty($addon_names)) {
-                $description .= ' (w/ ' . implode(', ', $addon_names) . ')';
-            }
-            $item_stmt->bind_param("isd", $order_id, $description, $item_price);
+        // Corrected logic to insert grouped items
+        $item_stmt = $conn->prepare("INSERT INTO order_items (order_id, item_description, quantity, price_at_purchase) VALUES (?, ?, ?, ?)");
+        foreach ($detailed_order as $desc => $order_item) {
+            $item_price_per_unit = $order_item['subtotal'] / $order_item['quantity'];
+            $item_stmt->bind_param("isid", $order_id, $desc, $order_item['quantity'], $item_price_per_unit);
             $item_stmt->execute();
         }
         $item_stmt->close();
 
         $conn->commit();
         unset($_SESSION['cart']); 
-
         $_SESSION['pending_order_id'] = $order_id;
 
         header("Location: payment.php?order_id=" . $order_id);
@@ -97,9 +86,33 @@ if ($confirm === '1' && $payment_method) {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Confirm Your Order</title>
+  <link rel="icon" type="image/png" href="images.png">
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
   <style>
-    /* ADDED style for a scrollable table on mobile */
+    /* --- ADD THESE STYLES --- */
+    .form-actions {
+        display: flex;
+        justify-content: center;
+        gap: 15px; /* Adds space between buttons */
+        margin-top: 20px;
+        flex-wrap: wrap; /* Allows buttons to stack on small screens */
+    }
+    .btn-cancel {
+        display: inline-block;
+        padding: 12px 25px;
+        background-color: #6c757d;
+        color: white;
+        font-weight: bold;
+        text-decoration: none;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        font-size: 1em; /* Matches btn-primary */
+        text-align: center;
+    }
+    .btn-cancel:hover { background-color: #5a6268; }
     .table-container {
         overflow-x: auto;
         margin-top: 20px;
@@ -109,7 +122,7 @@ if ($confirm === '1' && $payment_method) {
         width: 100%; 
         border-collapse: collapse; 
         text-align: left;
-        min-width: 500px; /* Prevents table from crushing on small screens */
+        min-width: 500px;
     }
     .order-summary-table th, .order-summary-table td { 
         padding: 12px; 
@@ -121,19 +134,35 @@ if ($confirm === '1' && $payment_method) {
     .payment-options { text-align:left; margin: 20px 0; }
   </style>
 </head>
-<body> <header>
-  <nav>
-    <div class="logo"><a href="index.php"><img src="images.png" alt="Baga Burger Logo"></a></div>
-    <button class="nav-toggle" aria-label="toggle navigation">
-        <span class="hamburger"></span>
-    </button>
-    <ul>
-      <li><a href="menu.php">Back to Menu</a></li>
-      <li><a href="my_orders.php">My Orders</a></li>
-      <li><a href="logout.php">Logout</a></li>
-    </ul>
-  </nav>
+<body class="full-content-page">
+
+<header>
+    <nav class="desktop-nav">
+        <div class="logo">
+            <a href="index.php"><img src="images.png" alt="Baga Burger Logo"></a>
+        </div>
+        <ul>
+            <li><a href="menu.php">Back to Menu</a></li>
+            <li><a href="my_orders.php">My Orders</a></li>
+            <li><a href="logout.php" onclick="return confirm('Are you sure you want to log out?')">Logout</a></li>
+        </ul>
+    </nav>
+    <div class="mobile-header">
+        <div class="logo">
+            <a href="index.php"><img src="images.png" alt="Baga Burger Logo"></a>
+        </div>
+        <button class="menu-toggle" aria-label="Open Menu"><i class="fas fa-bars"></i></button>
+    </div>
 </header>
+
+<div id="mobile-overlay" class="overlay">
+  <a href="javascript:void(0)" class="closebtn" aria-label="Close Menu">&times;</a>
+  <div class="overlay-content">
+    <a href="menu.php" class="nav-link"><i class="fas fa-arrow-left"></i> Back to Menu</a>
+    <a href="my_orders.php" class="nav-link"><i class="fas fa-history"></i> My Orders</a>
+    <a href="logout.php" class="nav-link" onclick="return confirm('Are you sure you want to log out?')"><i class="fas fa-sign-out-alt"></i> Logout</a>
+  </div>
+</div>
 
 <main>
   <section class="glass-section">
@@ -177,13 +206,22 @@ if ($confirm === '1' && $payment_method) {
           <input type="radio" name="payment_method" value="paymaya" required> PayMaya
         </label>
       </div>
-      <button type="submit" class="btn-primary">Confirm & Proceed to Payment</button>
-      <a href="menu.php" class="btn-secondary" style="background:grey; color:white; padding: 10px 20px; text-decoration: none; border-radius: 8px; margin-left:10px;">Cancel</a>
+      <div class="form-actions">
+        <button type="submit" class="btn-primary">Confirm & Proceed to Payment</button>
+        <a href="menu.php" class="btn-cancel">Cancel</a>
+      </div>
     </form>
   </section>
 </main>
 
-<script src="responsive.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const openNav = () => document.getElementById("mobile-overlay").style.height = "100%";
+    const closeNav = () => document.getElementById("mobile-overlay").style.height = "0%";
+    document.querySelector('.menu-toggle').addEventListener('click', openNav);
+    document.querySelector('.closebtn').addEventListener('click', closeNav);
+});
+</script>
 
 </body>
 </html>

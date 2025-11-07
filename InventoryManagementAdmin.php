@@ -83,8 +83,10 @@ $categories = $conn->query("SELECT DISTINCT category FROM menu ORDER BY category
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Menu Management - Admin</title>
+    <title>Inventory Management - Admin</title>
+    <link rel="icon" type="image/png" href="images.png">
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
     <style>
         .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;}
         .filter-bar { display: flex; gap: 15px; margin-bottom: 20px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; align-items: center; flex-wrap: wrap; }
@@ -117,30 +119,49 @@ $categories = $conn->query("SELECT DISTINCT category FROM menu ORDER BY category
 </head>
 <body>
     <header>
-        <nav>
-            <div class="logo"><a href="admin.php"><img src="images.png" alt="Baga Burger Logo"></a></div>
-            <button class="nav-toggle" aria-label="toggle navigation">
-                <span class="hamburger"></span>
-            </button>
+        <nav class="desktop-nav">
+            <div class="logo">
+                <a href="admin.php"><img src="images.png" alt="Baga Burger Logo"></a>
+            </div>
             <ul>
                 <li><a href="admin.php">Dashboard</a></li>
-                <li><a href="MenuManagementAdmin.php" class="active">Menu Management</a></li>
+                <li><a href="InventoryManagementAdmin.php" class="active">Inventory</a></li>
                 <li><a href="OrderList.php">Order List</a></li>
-                 <?php if ($_SESSION['role'] === 'owner'): ?>
-                    <li><a href="user_management.php">Manage Accounts</a></li>
+                <?php if ($_SESSION['role'] === 'owner'): ?>
+                    <li><a href="user_management.php">Users</a></li>
                 <?php endif; ?>
                 <li><a href="logout.php">Logout</a></li>
             </ul>
         </nav>
+        <div class="mobile-header">
+            <div class="logo">
+                <a href="admin.php"><img src="images.png" alt="Baga Burger Logo"></a>
+            </div>
+            <button class="menu-toggle" aria-label="Open Menu"><i class="fas fa-bars"></i></button>
+        </div>
     </header>
+
+    <div id="mobile-overlay" class="overlay">
+      <a href="javascript:void(0)" class="closebtn" aria-label="Close Menu">&times;</a>
+      <div class="overlay-content">
+        <a href="admin.php" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="InventoryManagementAdmin.php" class="nav-link"><i class="fas fa-boxes"></i> Inventory</a>
+        <a href="OrderList.php" class="nav-link"><i class="fas fa-clipboard-list"></i> Order List</a>
+        <?php if ($_SESSION['role'] === 'owner'): ?>
+            <a href="user_management.php" class="nav-link"><i class="fas fa-users-cog"></i> User Management</a>
+        <?php endif; ?>
+        <a href="logout.php" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+      </div>
+    </div>
+
     <main>
         <section class="glass-section">
             <div class="page-header">
-                <h1>🍔 Menu Management (Admin)</h1>
+                <h1>📦 Inventory Management (Admin)</h1>
                 <button class="btn-primary" onclick="openModal('addModal')">(+) Add New Item</button>
             </div>
             <?= $feedback ?>
-            <form action="MenuManagementAdmin.php" method="GET" class="filter-bar">
+            <form action="InventoryManagementAdmin.php" method="GET" class="filter-bar">
                 <input type="text" name="q" placeholder="Search by name..." value="<?= htmlspecialchars($search_query) ?>">
                 <select name="filter_category" onchange="this.form.submit()">
                     <option value="">All Categories</option>
@@ -191,10 +212,10 @@ $categories = $conn->query("SELECT DISTINCT category FROM menu ORDER BY category
     <div id="addModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Add New Menu Item</h2>
+                <h2>Add New Item</h2>
                 <span class="close-btn" onclick="closeModal('addModal')">&times;</span>
             </div>
-            <form action="MenuManagementAdmin.php" method="POST">
+            <form action="InventoryManagementAdmin.php" method="POST">
                 <div class="form-group"><label>Item Name</label><input type="text" name="name" required></div>
                 <div class="form-group"><label>Price (₱)</label><input type="number" step="0.01" name="price" required></div>
                 <div class="form-group"><label>Item Code (e.g., B1)</label><input type="text" name="code" required></div>
@@ -208,10 +229,10 @@ $categories = $conn->query("SELECT DISTINCT category FROM menu ORDER BY category
     <div id="editModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Edit Menu Item</h2>
+                <h2>Edit Item</h2>
                 <span class="close-btn" onclick="closeModal('editModal')">&times;</span>
             </div>
-            <form action="MenuManagementAdmin.php" method="POST">
+            <form action="InventoryManagementAdmin.php" method="POST">
                 <input type="hidden" id="edit-item-id" name="item_id">
                 <div class="form-group"><label>Item Name</label><input type="text" id="edit-name" name="name" required></div>
                 <div class="form-group"><label>Price (₱)</label><input type="number" step="0.01" id="edit-price" name="price" required></div>
@@ -222,7 +243,7 @@ $categories = $conn->query("SELECT DISTINCT category FROM menu ORDER BY category
             </form>
         </div>
     </div>
-
+    
     <script>
         function openModal(modalId) { document.getElementById(modalId).style.display = 'block'; }
         function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
@@ -242,8 +263,14 @@ $categories = $conn->query("SELECT DISTINCT category FROM menu ORDER BY category
                 event.target.style.display = 'none';
             }
         }
-    </script> 
-    
-    <script src="responsive.js"></script>
+
+        // Mobile Navigation Logic
+        document.addEventListener("DOMContentLoaded", () => {
+            const openNav = () => document.getElementById("mobile-overlay").style.height = "100%";
+            const closeNav = () => document.getElementById("mobile-overlay").style.height = "0%";
+            document.querySelector('.menu-toggle').addEventListener('click', openNav);
+            document.querySelector('.closebtn').addEventListener('click', closeNav);
+        });
+    </script>
 </body>
 </html>

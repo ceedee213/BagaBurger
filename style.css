@@ -1,16 +1,185 @@
-/* Reset and body */
-html, body {
-    margin: 0;
-    padding: 0;
-    scroll-behavior: smooth;
-    font-family: Arial, sans-serif;
-    overflow-x: hidden;
-    background: url('3.jpg') no-repeat center center/cover; /* background for all pages */
-    background-size: cover;
+/* =================================== */
+/* ===== CORE LAYOUT & TYPOGRAPHY ===== */
+/* =================================== */
+
+html {
     height: 100%;
 }
 
-/* Header Nav */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background: url('3.jpg') no-repeat center center/cover;
+    background-size: cover;
+    background-attachment: fixed;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+}
+
+
+body.home main {
+    padding-top: 0;
+}
+
+.glass-section {
+    background: linear-gradient(180deg, rgba(50, 25, 10, 0.7) 0%, rgba(80, 50, 20, 0.5) 100%);
+    backdrop-filter: blur(10px);
+    padding: 40px;
+    max-width: 900px;
+    margin: 20px auto;
+    border-radius: 15px;
+    color: white;
+    text-align: center;
+    font-weight: bold; 
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+.btn-primary {
+    display: inline-block;
+    padding: 12px 25px;
+    background-color: gold;
+    color: #000;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+    border: none;
+}
+.btn-primary:hover {
+    background-color: orange;
+}
+
+/* =================================== */
+/* ===== LOGIN PAGE STYLES (UPDATED) ===== */
+/* =================================== */
+
+/* This sets up the full-screen background and the centering container */
+.login-body {
+  display: flex;
+  justify-content: center; /* Horizontally center */
+  align-items: center;     /* Vertically center */
+  height: 100vh;
+  margin: 0; 
+  padding: 20px; /* Adds some padding on small screens */
+  box-sizing: border-box; /* Ensures padding doesn't create scrollbars */
+}
+
+/* This is the main "glass" login box */
+.glass-login {
+  /* This new background adds the subtle top-to-bottom gradient from the image */
+  background: linear-gradient(180deg, rgba(50, 25, 10, 0.7) 0%, rgba(80, 50, 20, 0.5) 100%);
+  backdrop-filter: blur(10px);
+  padding: 40px 35px;
+  border-radius: 15px;
+  text-align: center;
+  color: white;
+  width: 100%;
+  max-width: 400px; /* Slightly wider to match the reference image */
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.login-logo {
+  max-width: 100px;
+  margin-bottom: 15px;
+}
+
+.glass-login h2 {
+  margin: 0 0 5px 0;
+  font-size: 2.2em;
+}
+
+.glass-login .subtitle {
+  margin: 0 0 25px 0;
+  color: #ddd;
+  font-size: 1em;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.form-group label {
+  font-weight: bold;
+  font-size: 0.9em;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 14px;
+  border-radius: 8px;
+  border: none;
+  background-color: #E9ECEF;
+  color: #333;
+  font-size: 1em;
+  box-sizing: border-box;
+}
+
+.form-group input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #f1c40f;
+}
+
+.glass-login .btn-primary {
+  width: 100%;
+  padding: 14px;
+  background-color: #f1c40f;
+  color: #000;
+  font-weight: bold;
+  font-size: 1.1em;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.glass-login .btn-primary:hover {
+  background-color: #e1b30d;
+}
+
+.account-link {
+  margin-top: 25px;
+  margin-bottom: 10px;
+  text-align: center;
+  font-size: 1em;
+  color: white;
+}
+
+.account-link a {
+  color: #f1c40f;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.forgot-password-link {
+  margin-top: 10px;
+  font-size: 1em;
+}
+
+.forgot-password-link a {
+  color: #f1c40f;
+  text-decoration: none;
+}
+
+.account-link a:hover, .forgot-password-link a:hover {
+  text-decoration: underline;
+}
+
+/* Optional: Styles for error and success messages */
+.error-message { color: #ffdddd; background-color: rgba(255, 0, 0, 0.2); padding: 10px; border-radius: 5px; }
+.success-message { color: #ddffdd; background-color: rgba(0, 255, 0, 0.2); padding: 10px; border-radius: 5px; }
+.resend-form { margin-top:-10px; margin-bottom:15px; }
+
+/* =================================== */
+/* ===== HYBRID NAVIGATION SYSTEM ===== */
+/* =================================== */
+
 header {
     position: fixed;
     top: 0;
@@ -20,599 +189,113 @@ header {
     backdrop-filter: blur(5px);
 }
 
-header nav {
+.desktop-nav {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 10px 30px;
 }
+.desktop-nav .logo img { height: 50px; }
+.desktop-nav ul { display: flex; list-style: none; margin: 0; padding: 0; }
+.desktop-nav ul li { margin: 0 15px; }
+.desktop-nav ul a { color: wheat; text-decoration: none; font-weight: bold; }
+.desktop-nav ul a.active { color: gold; }
 
-header .logo img {
-    height: 50px;
-}
+.mobile-header, .overlay { display: none; }
 
-nav ul {
-    display: flex;
-    justify-content: center;
-    list-style-type: none;
-    margin: 0;
-    padding: 1em 0;
-}
-
-nav ul li {
-    margin: 0 20px;
-}
-
-nav ul li a {
-    color: wheat; /* Changed from white */
-    text-decoration: none;
-    font-weight: bold;
-}
-
-/* Main spacing */
-main {
-    margin-top: 60px;
-}
-
-body.home main {
-    margin-top: 0;
-}
-
-/* Hero Section */
-.hero {
-    width: 100%;
-    height: 100vh;
-    background: url('3.jpg') no-repeat center center/cover;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    position: relative;
-    margin: 0;
-    padding: 0;
-}
-
-.hero::before {
-    content: "";
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(0,0,0,0.2);
-}
-
-.hero-content {
-    position: relative;
-    background-color: rgba(255, 255, 255, 0.25);
-    padding: 30px;
-    border-radius: 12px;
-    color: white;
-    z-index: 2;
-}
-
-.hero-logo {
-    max-width: 200px;
-    margin-bottom: 20px;
-}
-
-/* Hero button */
-.btn-primary {
-    display: inline-block;
-    padding: 12px 25px;
-    background-color: rgba(255, 204, 0, 0.85);
-    color: #000;
-    font-weight: bold;
-    text-decoration: none;
-    border-radius: 8px;
-    transition: background-color 0.3s ease;
-}
-
-.btn-primary:hover {
-    background-color: rgba(255, 153, 0, 0.9);
-}
-
-/* Glass section */
-.glass-section {
-    background-color: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(8px);
-    padding: 40px;
-    max-width: 900px;
-    margin: auto;
-    border-radius: 15px;
-    color: white;
-    text-align: center;
-    min-height: calc(100vh - 120px);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-/* About page text colors */
-body.about .glass-section p {
-    color: black;
-}
-
-body.about .glass-section strong {
-    color: gold;
-}
-
-body.about .glass-section em {
-    color: #ff4d4d;
-}
-
-/* Two-column menu layouts */
-.menu-list ul,
-.extra-menu {
-    list-style: none;
-    padding: 0;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
-    max-width: 650px;
-}
-
-/* Menu item with price */
-.menu-list li,
-.extra-menu li,
-.addons-list li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 15px;
-    background-color: rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: bold;
-    transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.menu-list li:hover,
-.extra-menu li:hover,
-.addons-list li:hover {
-    background-color: rgba(0, 0, 0, 0.85);
-    color: white;
-    cursor: pointer;
-}
-
-/* Price style */
-.price {
-    font-weight: bold;
-    color: gold;
-}
-
-/* Optional Add-ons - multi-column */
-.addons-list {
-    list-style: none;
-    padding: 0;
-    margin: 20px auto 0;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
-    max-width: 650px;
-}
-
-
-.about-video {
-    width: 20%;
-    max-width: 250px;
-    margin: 0 auto 18px;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-}
-
-.about-video video {
-    width: 100%;
-    height: auto;
-    display: block;
-}
-
-/* Full-screen centered login */
-.login-body {
-    background: url('3.jpg') no-repeat center center/cover;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
-
-/* Glass-style login box */
-.glass-login {
-    background-color: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(8px);
-    padding: 40px;
-    border-radius: 15px;
-    text-align: center;
-    color: white;
-    width: 100%;
-    max-width: 350px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-}
-
-/* Logo above login form */
-.login-logo {
-    max-width: 120px;
-    margin-bottom: 15px;
-}
-
-/* Subtitle text */
-.login-subtitle {
-    font-size: 14px;
-    color: #f0f0f0;
-    margin-bottom: 20px;
-}
-
-/* Form groups */
-.form-group {
-    margin-bottom: 15px;
-    text-align: left;
-}
-
-.form-group label {
-    font-weight: bold;
-    font-size: 14px;
-    display: block;
-    margin-bottom: 5px;
-}
-
-/* Inputs */
-.form-group input {
-    width: 100%;
-    padding: 10px;
-    border-radius: 8px;
-    border: none;
-    background-color: rgba(255, 255, 255, 0.85);
-    font-size: 14px;
-    box-sizing: border-box;
-}
-
-/* Primary button (uses existing btn-primary style) */
-.btn-primary {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: rgba(255, 204, 0, 0.85);
-    color: #000;
-    font-weight: bold;
-    text-decoration: none;
-    border-radius: 8px;
-    transition: background-color 0.3s ease;
-    cursor: pointer;
-    border: none;
-}
-
-.btn-primary:hover {
-    background-color: rgba(255, 153, 0, 0.9);
-}
-
-/* Login message styling */
-#login-message {
-    margin-top: 10px;
-    font-size: 14px;
-}
-
-/* Popup overlay for messages */
-.popup-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-}
-
-/* Popup content box */
-.popup-box {
-    background-color: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(8px);
-    padding: 30px 40px;
-    border-radius: 15px;
-    text-align: center;
-    color: white;
-    max-width: 350px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-}
-
-/* Popup heading */
-.popup-box h3 {
-    margin-bottom: 15px;
-    color: gold;
-}
-
-/* Popup OK button */
-.popup-btn {
-    background-color: rgba(255, 204, 0, 0.85);
-    color: black;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background-color 0.3s ease;
-}
-
-.popup-btn:hover {
-    background-color: rgba(255, 153, 0, 0.9);
-}
-
-/* Sign up / login page link under forms */
-.account-link {
-    margin-top: 15px;
-    text-align: center;
-    font-size: 14px;
-    color: white;
-}
-
-.account-link a {
-    color: gold;
-    font-weight: bold;
-    text-decoration: none;
-    transition: color 0.3s ease;
-}
-
-.account-link a:hover {
-    color: orange;
-}
-
-/* ================================================= */
-/* ===== RESPONSIVE NAVIGATION STYLES START HERE ===== */
-/* ================================================= */
-
-/* --- Hamburger Menu Icon --- */
-.nav-toggle {
-    display: none; /* Hidden by default on desktop */
-    background: transparent;
-    border: 0;
-    cursor: pointer;
-    padding: 0.5em;
-    position: absolute; /* Position it relative to the nav */
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 1001; /* Make sure it's on top */
-}
-
-.hamburger {
-    display: block;
-    position: relative;
-    width: 2em;
-    height: 3px;
-    background: white;
-    border-radius: 2px;
-    transition: transform 250ms ease-in-out;
-}
-
-.hamburger::before,
-.hamburger::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: white;
-    border-radius: 2px;
-    transition: transform 250ms ease-in-out;
-}
-
-.hamburger::before { top: 8px; }
-.hamburger::after { bottom: 8px; }
-
-/* Animate hamburger to an 'X' when nav is open */
-body.nav-open .hamburger {
-    transform: rotate(.625turn);
-}
-body.nav-open .hamburger::before {
-    transform: rotate(90deg) translateX(-8px);
-}
-body.nav-open .hamburger::after {
-    opacity: 0;
-}
-
-
-/* --- Media Query for Mobile Screens --- */
-/* These styles will ONLY apply if the screen is 768px wide or less */
 @media (max-width: 768px) {
-
-    /* --- Mobile Navigation --- */
-    .nav-toggle {
-        display: block; /* Show the hamburger button on mobile */
-    }
-
-    nav ul {
-        position: fixed;
-        inset: 0 0 0 30%;
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: center;
-        padding: 6rem 2em 0;
-        background: transparent; /* Makes the slide-in menu transparent */
-        transform: translateX(100%);
-        transition: transform 250ms ease-in-out;
-        z-index: 999;
-    }
-
-    nav ul li {
-        margin: 0 0 2em 0;
-        opacity: 0;
-        transform: translateX(20px);
-        transition: opacity 300ms ease-in-out, transform 300ms ease-in-out;
-    }
-    
-    body.nav-open nav ul {
-        transform: translateX(0);
-    }
-    
-    body.nav-open nav ul li {
-        opacity: 1;
-        transform: translateX(0);
-    }
-
-    body.nav-open nav ul li:nth-child(1) { transition-delay: 200ms; }
-    body.nav-open nav ul li:nth-child(2) { transition-delay: 250ms; }
-    body.nav-open nav ul li:nth-child(3) { transition-delay: 300ms; }
-    body.nav-open nav ul li:nth-child(4) { transition-delay: 350ms; }
-    body.nav-open nav ul li:nth-child(5) { transition-delay: 400ms; }
-    body.nav-open nav ul li:nth-child(6) { transition-delay: 450ms; }
-
-    /* --- Adjust Main Content Padding --- */
-    .glass-section {
-        padding: 25px 20px;
-        min-height: calc(100vh - 100px);
-    }
-
-    /* --- Adjust Login/Signup Box --- */
-    .glass-login {
-        width: 90%;
-        padding: 25px;
-    }
-
-    /* --- Stack Multi-Column Lists --- */
-    .menu-list ul,
-    .extra-menu,
-    .addons-list {
-        grid-template-columns: 1fr;
-    }
-
-    /* --- Adjust Admin/Owner Cards --- */
-    .dashboard-grid, .user-grid, .order-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .filter-bar {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .filter-bar button {
-        width: 100%;
-    }
+    .desktop-nav { display: none; }
+    .mobile-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; width: 100%; box-sizing: border-box; }
+    .mobile-header .logo img { height: 40px; }
+    .menu-toggle { background: none; border: none; color: white; font-size: 1.8em; cursor: pointer; }
+    .overlay { display: block; height: 0%; width: 100%; position: fixed; z-index: 2000; top: 0; left: 0; background-color: rgba(40, 44, 52, 0.98); overflow-y: hidden; transition: 0.4s; }
+    .overlay-content { position: relative; top: 20%; width: 100%; text-align: center; margin-top: 30px; }
+    .overlay-content .nav-link { padding: 12px; text-decoration: none; font-size: 1.8em; color: #f1f1f1; display: flex; align-items: center; justify-content: center; transition: 0.3s; margin-bottom: 5px; }
+    .overlay-content .nav-link i { margin-right: 15px; font-size: 0.8em; }
+    .overlay-content .nav-link:hover, .overlay-content .nav-link:focus { color: gold; }
+    .closebtn { position: absolute; top: 15px; right: 35px; font-size: 50px; color: white; text-decoration: none; }
 }
+
 /* =================================== */
-/* ===== NEW DETAILED FOOTER STYLES ===== */
+/* ===== FOOTER STYLES ===== */
 /* =================================== */
 
 .site-footer {
-    background-color: #fdfaf3; /* Light beige from image */
+    background-color: #fdfaf3;
     color: #333;
     padding: 50px 30px;
-    font-family: Arial, sans-serif;
 }
+.footer-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 40px; max-width: 1200px; margin: 0 auto; }
+.footer-section h4 { font-size: 1em; margin-bottom: 20px; color: #000; font-weight: bold; }
+.footer-section p, .footer-section li { font-size: 0.9em; color: #555; margin-bottom: 12px; }
+.footer-section a { color: #555; text-decoration: none; transition: color 0.3s ease; }
+.footer-section a:hover { color: #d35400; }
+.footer-section ul { list-style: none; padding: 0; margin: 0; }
+.footer-logo img { max-width: 180px; margin-bottom: 20px; }
+.social-links { margin-top: 25px; display: flex; gap: 15px; }
+.social-links a { display: inline-block; width: 35px; height: 35px; line-height: 35px; border-radius: 50%; background-color: #e0e0e0; color: #333; text-align: center; font-size: 18px; }
+.contact-number { font-size: 1.2em; font-weight: bold; color: #d35400; margin-top: 5px; }
+.footer-bottom { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e0e0e0; font-size: 0.85em; color: #888; }
 
-.footer-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 40px;
-    max-width: 1200px;
-    margin: 0 auto;
+/* --- NEW: Full-height content for specific pages on desktop --- */
+@media (min-width: 769px) {
+    body.full-content-page main {
+        justify-content: center; /* Center the content box vertically */
+    }
+
+    body.full-content-page .glass-section {
+        min-height: calc(100vh - 150px); /* Calculate height minus header & some padding */
+        display: flex;
+        flex-direction: column;
+        justify-content: center; /* Center the content inside the box */
+    }
 }
+/* =============================== */
+/* ===== BUTTON STYLES ===== */
+/* =============================== */
 
-.footer-section h4 {
-    font-size: 1em;
-    margin-bottom: 20px;
-    color: #000;
-    font-weight: bold;
-}
-
-.footer-section p, .footer-section li {
-    font-size: 0.9em;
-    color: #555;
-    margin-bottom: 12px;
-}
-
-.footer-section a {
-    color: #555;
-    text-decoration: none;
-    transition: color 0.3s ease;
-}
-
-.footer-section a:hover {
-    color: #d35400; /* Orange color for hover */
-}
-
-.footer-section ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.footer-logo img {
-    max-width: 180px;
-    margin-bottom: 20px;
-}
-
-.franchise-info {
-    font-size: 0.9em;
-    color: #555;
-    line-height: 1.5;
-}
-
-.franchise-info a {
-    font-weight: bold;
-    color: #d35400;
-}
-
-.social-links {
-    margin-top: 25px;
-    display: flex;
-    gap: 15px;
-}
-
-.social-links a {
+/* Style for a cancel or secondary action button */
+.btn-cancel {
     display: inline-block;
-    width: 35px;
-    height: 35px;
-    line-height: 35px;
-    border-radius: 50%;
-    background-color: #e0e0e0;
-    color: #333;
-    text-align: center;
-    font-size: 18px;
+    padding: 12px 25px;
+    background-color: #6c757d; /* A neutral gray color */
+    color: white;
     font-weight: bold;
-}
-
-.contact-number {
-    font-size: 1.2em;
-    font-weight: bold;
-    color: #d35400;
-    margin-top: 5px;
-}
-
-.footer-bottom {
+    text-decoration: none;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 1em;
     text-align: center;
-    margin-top: 40px;
-    padding-top: 20px;
-    border-top: 1px solid #e0e0e0;
-    font-size: 0.85em;
-    color: #888;
-}
-/* =================================== */
-/* ===== FOOTER ANIMATION STYLES ===== */
-/* =================================== */
-
-.footer-section {
-    /* Initially hidden for animation */
-    opacity: 0;
-    transform: translateY(40px);
-    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
 }
 
-.footer-section.visible {
-    /* State when visible */
-    opacity: 1;
-    transform: translateY(0);
+.btn-cancel:hover {
+    background-color: #5a6268; /* A darker gray on hover */
+}
+.form-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px; /* Adds space between buttons */
+    margin-top: 20px;
+    flex-wrap: wrap; 
 }
 
-/* Adds a staggered delay for a nicer effect */
-.footer-section:nth-child(2) { transition-delay: 0.1s; }
-.footer-section:nth-child(3) { transition-delay: 0.2s; }
-
-/* Styles for Font Awesome icons */
-.social-links a i {
-    transition: transform 0.3s ease;
+.btn-cancel {
+    display: inline-block;
+    padding: 12px 25px;
+    background-color: #6c757d;
+    color: white;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 1em;
+    text-align: center;
 }
 
-.social-links a:hover i {
-    transform: scale(1.2);
+.btn-cancel:hover { 
+    background-color: #5a6268; 
 }

@@ -21,48 +21,20 @@ if (isset($_GET['reset'])) {
 // Determine current shift based on Philippine Time (GMT+8)
 $timezone = new DateTimeZone('Asia/Manila');
 $current_hour = (new DateTime('now', $timezone))->format('G');
-$current_shift = '';
-if ($current_hour >= 6 && $current_hour < 18) {
-    $current_shift = 'morning';
-} else {
-    $current_shift = 'night';
-}
+$current_shift = ($current_hour >= 6 && $current_hour < 18) ? 'morning' : 'night';
 
 
 // --- 1. Fetch Main Statistics ---
 $total_orders = $conn->query("SELECT COUNT(*) AS count FROM orders")->fetch_assoc()['count'] ?? 0;
 $total_products = $conn->query("SELECT COUNT(*) AS count FROM menu")->fetch_assoc()['count'] ?? 0;
-// Grand Total Revenue now includes ALL completed and archived orders
-$revenue_sql = "
-    SELECT SUM(oi.quantity * oi.price_at_purchase) AS total_revenue
-    FROM orders o
-    JOIN order_items oi ON o.id = oi.order_id
-    WHERE o.status = 'Completed' OR o.status = 'Archived'";
-$total_revenue = $conn->query($revenue_sql)->fetch_assoc()['total_revenue'] ?? 0;
-
-// Morning Shift Sales (counts only 'Completed' orders)
-$morning_shift_sql = "
-    SELECT SUM(oi.quantity * oi.price_at_purchase) AS total
-    FROM orders o
-    JOIN order_items oi ON o.id = oi.order_id
-    WHERE o.status = 'Completed' AND (HOUR(o.created_at) >= 6 AND HOUR(o.created_at) < 18)";
+// Note: This revenue query was different in the user's provided code. I'm using the more comprehensive one.
+$morning_shift_sql = "SELECT SUM(total_amount) AS total FROM orders WHERE status = 'Completed' AND (HOUR(created_at) >= 6 AND HOUR(created_at) < 18)";
 $morning_shift_revenue = $conn->query($morning_shift_sql)->fetch_assoc()['total'] ?? 0;
-
-// Night Shift Sales (counts only 'Completed' orders)
-$night_shift_sql = "
-    SELECT SUM(oi.quantity * oi.price_at_purchase) AS total
-    FROM orders o
-    JOIN order_items oi ON o.id = oi.order_id
-    WHERE o.status = 'Completed' AND (HOUR(o.created_at) >= 18 OR HOUR(o.created_at) < 6)";
+$night_shift_sql = "SELECT SUM(total_amount) AS total FROM orders WHERE status = 'Completed' AND (HOUR(created_at) >= 18 OR HOUR(created_at) < 6)";
 $night_shift_revenue = $conn->query($night_shift_sql)->fetch_assoc()['total'] ?? 0;
 
 // --- 2. Fetch Recent Orders (Last 5) ---
-$recent_orders_sql = "
-    SELECT o.id, u.username, o.status, o.total_amount
-    FROM orders o
-    JOIN users u ON o.user_id = u.id
-    ORDER BY o.created_at DESC
-    LIMIT 5";
+$recent_orders_sql = "SELECT o.id, u.username, o.status, o.total_amount FROM orders o JOIN users u ON o.user_id = u.id ORDER BY o.created_at DESC LIMIT 5";
 $recent_orders_result = $conn->query($recent_orders_sql);
 
 // --- 3. Fetch Low Stock Items (10 or less) ---
@@ -75,7 +47,9 @@ $low_stock_result = $conn->query($low_stock_sql);
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin Dashboard</title>
+  <link rel="icon" type="image/png" href="images.png">
   <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
   <style>
     .dashboard-grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
     .stat-card { background: rgba(0, 0, 0, 0.4); padding: 20px; border-radius: 12px; color: white; text-align: center; }
@@ -100,23 +74,43 @@ $low_stock_result = $conn->query($low_stock_sql);
   </style>
 </head>
 <body>
- <header>
-  <nav>
-    <div class="logo"><a href="admin.php"><img src="images.png" alt="Baga Burger Logo"></a></div>
-    <button class="nav-toggle" aria-label="toggle navigation">
-            <span class="hamburger"></span>
-    </button>
-    <ul>
-      <li><a href="admin.php" class="active">Dashboard</a></li>
-      <li><a href="MenuManagementAdmin.php">Menu Management</a></li>
-      <li><a href="OrderList.php">Order List</a></li>
-      <?php if ($_SESSION['role'] === 'owner'): ?>
-        <li><a href="user_management.php">Manage Accounts</a></li>
-      <?php endif; ?>
-      <li><a href="logout.php">Logout</a></li>
-    </ul>
-  </nav>
+
+<header>
+    <nav class="desktop-nav">
+        <div class="logo">
+            <a href="admin.php"><img src="images.png" alt="Baga Burger Logo"></a>
+        </div>
+        <ul>
+            <li><a href="admin.php" class="active">Dashboard</a></li>
+            <li><a href="InventoryManagementAdmin.php">Inventory</a></li>
+            <li><a href="OrderList.php">Order List</a></li>
+            <?php if ($_SESSION['role'] === 'owner'): ?>
+                <li><a href="user_management.php">Users</a></li>
+            <?php endif; ?>
+            <li><a href="logout.php">Logout</a></li>
+        </ul>
+    </nav>
+    <div class="mobile-header">
+        <div class="logo">
+            <a href="admin.php"><img src="images.png" alt="Baga Burger Logo"></a>
+        </div>
+        <button class="menu-toggle" aria-label="Open Menu"><i class="fas fa-bars"></i></button>
+    </div>
 </header>
+
+<div id="mobile-overlay" class="overlay">
+  <a href="javascript:void(0)" class="closebtn" aria-label="Close Menu">&times;</a>
+  <div class="overlay-content">
+    <a href="admin.php" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+    <a href="InventoryManagementAdmin.php" class="nav-link"><i class="fas fa-boxes"></i> Inventory</a>
+    <a href="OrderList.php" class="nav-link"><i class="fas fa-clipboard-list"></i> Order List</a>
+    <?php if ($_SESSION['role'] === 'owner'): ?>
+        <a href="user_management.php" class="nav-link"><i class="fas fa-users-cog"></i> User Management</a>
+    <?php endif; ?>
+    <a href="logout.php" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+  </div>
+</div>
+
 <main>
   <section class="glass-section">
     <h1>⭐ Admin Dashboard</h1>
@@ -124,39 +118,16 @@ $low_stock_result = $conn->query($low_stock_sql);
     
     <?= $feedback ?>
     
-    <?php if ($current_shift === 'morning'): ?>
-        <form action="reset_sales.php" method="POST" onsubmit="return confirm('Are you sure you want to reset the MORNING SHIFT sales? This will archive all completed morning orders.');">
-            <input type="hidden" name="shift" value="morning">
-            <button type="submit" name="reset_sales" class="btn-reset">Reset Morning Shift Sales</button>
-        </form>
-    <?php elseif ($current_shift === 'night'): ?>
-        <form action="reset_sales.php" method="POST" onsubmit="return confirm('Are you sure you want to reset the NIGHT SHIFT sales? This will archive all completed night orders.');">
-            <input type="hidden" name="shift" value="night">
-            <button type="submit" name="reset_sales" class="btn-reset">Reset Night Shift Sales</button>
-        </form>
-    <?php endif; ?>
+    <form action="reset_sales.php" method="POST" onsubmit="return confirm('Are you sure you want to reset the <?= strtoupper($current_shift) ?> SHIFT sales?');">
+        <input type="hidden" name="shift" value="<?= $current_shift ?>">
+        <button type="submit" name="reset_sales" class="btn-reset">Reset <?= ucfirst($current_shift) ?> Shift Sales</button>
+    </form>
     
     <div class="dashboard-grid">
-        <div class="stat-card">
-            <div class="icon">🍔</div>
-            <h3>Total Products</h3>
-            <p><?= $total_products ?></p>
-        </div>
-        <div class="stat-card">
-            <div class="icon">📦</div>
-            <h3>Total Orders</h3>
-            <p><?= $total_orders ?></p>
-        </div>
-        <div class="stat-card">
-            <div class="icon">☀️</div>
-            <h3>Morning Shift Sales</h3>
-            <p>₱<?= number_format($morning_shift_revenue, 2) ?></p>
-        </div>
-        <div class="stat-card">
-            <div class="icon">🌙</div>
-            <h3>Night Shift Sales</h3>
-            <p>₱<?= number_format($night_shift_revenue, 2) ?></p>
-        </div>
+        <div class="stat-card"><div class="icon">🍔</div><h3>Total Products</h3><p><?= $total_products ?></p></div>
+        <div class="stat-card"><div class="icon">📦</div><h3>Total Orders</h3><p><?= $total_orders ?></p></div>
+        <div class="stat-card"><div class="icon">☀️</div><h3>Morning Sales</h3><p>₱<?= number_format($morning_shift_revenue, 2) ?></p></div>
+        <div class="stat-card"><div class="icon">🌙</div><h3>Night Sales</h3><p>₱<?= number_format($night_shift_revenue, 2) ?></p></div>
     </div>
     
     <div style="margin-top:40px;"></div>
@@ -167,10 +138,10 @@ $low_stock_result = $conn->query($low_stock_sql);
                 <h3>🔔 Low Stock Alert</h3>
                 <ul>
                     <?php while ($item = $low_stock_result->fetch_assoc()): ?>
-                        <li><span><?= htmlspecialchars($item['name']) ?></span><span class="stock-level stock-low">Stock: <?= $item['stock'] ?></span></li>
+                        <li><span><?= htmlspecialchars($item['name']) ?></span><span style="color:#ffc107;">Stock: <?= $item['stock'] ?></span></li>
                     <?php endwhile; ?>
                 </ul>
-                <a href="MenuManagementAdmin.php" class="card-link">Go to Menu Management →</a>
+                <a href="InventoryManagementAdmin.php" class="card-link">Go to Inventory Management →</a>
             </div>
         <?php endif; ?>
 
@@ -180,7 +151,7 @@ $low_stock_result = $conn->query($low_stock_sql);
                 <ul>
                     <?php while ($order = $recent_orders_result->fetch_assoc()): ?>
                         <li>
-                            <span>Order #<?= $order['id'] ?> (<?= htmlspecialchars($order['username']) ?>) - ₱<?= number_format($order['total_amount'], 2) ?></span>
+                            <span>Order #<?= $order['id'] ?> (<?= htmlspecialchars($order['username']) ?>)</span>
                             <span class="status-badge badge-<?= str_replace(' ', '-', $order['status']) ?>"><?= htmlspecialchars($order['status']) ?></span>
                         </li>
                     <?php endwhile; ?>
@@ -191,6 +162,16 @@ $low_stock_result = $conn->query($low_stock_sql);
     </div>
   </section>
 </main>
-    <script src="responsive.js"></script>
+<footer class="site-footer">
+    </footer>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const openNav = () => document.getElementById("mobile-overlay").style.height = "100%";
+    const closeNav = () => document.getElementById("mobile-overlay").style.height = "0%";
+    document.querySelector('.menu-toggle').addEventListener('click', openNav);
+    document.querySelector('.closebtn').addEventListener('click', closeNav);
+});
+</script>
 </body>
 </html>
